@@ -23,7 +23,9 @@ import com.seank.vatroutbuddy.ui.navigation.NavigationItem
 import com.seank.vatroutbuddy.ui.navigation.NavigationRoutes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
