@@ -3,9 +3,10 @@ package com.seank.vatroutbuddy.data.model
 import java.time.LocalDate
 
 data class StockingInfo(
-    val id: String,
-    val locationId: String,
     val date: LocalDate,
-    val species: String,
-    val amount: Int
-) 
+    val county: String,
+    val waterbody: String,
+    val category: String,
+    val species: List<String>,
+    val isNationalForest: Boolean = false
+)

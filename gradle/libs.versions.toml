@@ -16,6 +16,7 @@ composeBom = "2024.02.00"
 composeCompiler = "1.5.14"
 hilt = "2.51.1"
 hiltNavigationCompose = "1.2.0"
+jsoup = "1.17.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -44,6 +45,8 @@ navigation-compose = { group = "androidx.navigation", name = "navigation-compose
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+
+jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

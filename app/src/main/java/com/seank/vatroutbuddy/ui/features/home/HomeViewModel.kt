@@ -1,21 +1,45 @@
 package com.seank.vatroutbuddy.ui.features.home
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.seank.vatroutbuddy.data.model.StockingInfo
 import com.seank.vatroutbuddy.data.repository.StockingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val stockingRepository: StockingRepository
 ) : ViewModel() {
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is the home screen"
+    init {
+        loadStockings()
     }
-    val text: LiveData<String> = _text
 
-    val recentStockings = stockingRepository.getRecentStockings()
+    private fun loadStockings() {
+        viewModelScope.launch {
+            _uiState.value = HomeUiState.Loading
+            stockingRepository.getRecentStockings()
+                .onSuccess { stockings ->
+                    _uiState.value = HomeUiState.Success(stockings)
+                }
+                .onFailure { exception ->
+                    _uiState.value = HomeUiState.Error(
+                        exception.localizedMessage ?: "Failed to load stocking data"
+                    )
+                }
+        }
+    }
+}
+
+sealed class HomeUiState {
+    data object Loading : HomeUiState()
+    data class Success(val stockings: List<StockingInfo>) : HomeUiState()
+    data class Error(val message: String) : HomeUiState()
 } 
