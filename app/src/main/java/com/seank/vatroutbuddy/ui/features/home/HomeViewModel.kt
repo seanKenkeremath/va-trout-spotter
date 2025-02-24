@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,7 +26,11 @@ class HomeViewModel @Inject constructor(
     private fun loadStockings() {
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading
-            stockingRepository.getRecentStockings()
+            
+            // Get date 6 months ago
+            val startDate = LocalDate.now().minusMonths(6)
+            
+            stockingRepository.getRecentStockings(startDate)
                 .onSuccess { stockings ->
                     _uiState.value = HomeUiState.Success(stockings)
                 }
