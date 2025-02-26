@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,12 +30,16 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 stockingRepository.getRecentStockings(LocalDate.now().minusMonths(6)),
+                stockingRepository.getLastUpdateTime(),
                 isRefreshing
-            ) { stockings, refreshing ->
+            ) { stockings, lastUpdated, refreshing ->
                 when {
                     refreshing -> HomeUiState.Loading
                     stockings.isEmpty() -> HomeUiState.Empty
-                    else -> HomeUiState.Success(stockings)
+                    else -> HomeUiState.Success(
+                        stockings = stockings,
+                        lastUpdatedAt = lastUpdated ?: LocalDateTime.now()
+                    )
                 }
             }.collect { state ->
                 _uiState.value = state
@@ -46,14 +51,7 @@ class HomeViewModel @Inject constructor(
         isRefreshing.value = true
         viewModelScope.launch {
             stockingRepository.refreshStockings()
-                .onSuccess {
-                    isRefreshing.value = false
-                }
-                .onFailure { e ->
-                    // TODO: toast
-                    isRefreshing.value = false
-                    _uiState.value = HomeUiState.Error(e.message?: "Error")
-                }
+            isRefreshing.value = false
         }
     }
 }
@@ -61,6 +59,6 @@ class HomeViewModel @Inject constructor(
 sealed class HomeUiState {
     data object Loading : HomeUiState()
     data object Empty : HomeUiState()
-    data class Success(val stockings: List<StockingInfo>) : HomeUiState()
+    data class Success(val stockings: List<StockingInfo>, val lastUpdatedAt: LocalDateTime) : HomeUiState()
     data class Error(val message: String) : HomeUiState()
 } 

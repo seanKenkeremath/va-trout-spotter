@@ -8,5 +8,5 @@ data class StockingInfo(
     val waterbody: String,
     val category: String,
     val species: List<String>,
-    val isNationalForest: Boolean = false
+    val isNationalForest: Boolean
 )
