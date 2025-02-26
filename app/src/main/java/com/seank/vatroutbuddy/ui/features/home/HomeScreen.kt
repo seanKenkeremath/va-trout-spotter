@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.seank.vatroutbuddy.data.model.StockingInfo
+import com.seank.vatroutbuddy.domain.model.StockingInfo
 import java.time.format.DateTimeFormatter
 
 @Composable

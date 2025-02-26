@@ -1,4 +1,4 @@
-package com.seank.vatroutbuddy.data.model
+package com.seank.vatroutbuddy.domain.model
 
 import java.time.LocalDate
 

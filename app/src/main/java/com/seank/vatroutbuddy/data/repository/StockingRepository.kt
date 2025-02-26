@@ -1,7 +1,7 @@
 package com.seank.vatroutbuddy.data.repository
 
 import com.seank.vatroutbuddy.data.html.StockingHtmlParser
-import com.seank.vatroutbuddy.data.model.StockingInfo
+import com.seank.vatroutbuddy.domain.model.StockingInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup

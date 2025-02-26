@@ -1,6 +1,6 @@
 package com.seank.vatroutbuddy.data.html
 
-import com.seank.vatroutbuddy.data.model.StockingInfo
+import com.seank.vatroutbuddy.domain.model.StockingInfo
 import org.jsoup.nodes.Document
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

@@ -2,7 +2,7 @@ package com.seank.vatroutbuddy.ui.features.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.seank.vatroutbuddy.data.model.StockingInfo
+import com.seank.vatroutbuddy.domain.model.StockingInfo
 import com.seank.vatroutbuddy.data.repository.StockingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
