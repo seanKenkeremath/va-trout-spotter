@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 
 @Dao
 interface StockingDao {
-    @Query("SELECT * FROM stockings WHERE date >= :startDate")
+    @Query("SELECT * FROM stockings WHERE date >= :startDate ORDER BY date DESC")
     fun getStockingsAfter(startDate: LocalDate): Flow<List<StockingEntity>>
 
     @Query("SELECT MAX(lastUpdated) FROM stockings")

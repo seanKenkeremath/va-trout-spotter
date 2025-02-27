@@ -32,7 +32,7 @@ class StockingDaoTest {
     }
 
     @Test
-    fun `getStockingsAfter returns only stockings after specified date`() = runTest {
+    fun `getStockingsAfter returns stockings after specified date in descending order`() = runTest {
         val today = LocalDate.now()
         val stockings = listOf(
             createStocking(1, today, "Lake A"),
@@ -45,7 +45,7 @@ class StockingDaoTest {
         val result = stockingDao.getStockingsAfter(today.minusDays(7)).first()
 
         assertEquals(3, result.size)
-        assertEquals(setOf("Lake A", "Lake B", "Lake C"), result.map { it.waterbody }.toSet())
+        assertEquals(listOf("Lake A", "Lake B", "Lake C"), result.map { it.waterbody })
     }
 
     @Test
