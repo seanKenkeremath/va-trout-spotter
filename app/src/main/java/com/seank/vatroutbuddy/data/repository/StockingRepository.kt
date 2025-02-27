@@ -23,9 +23,8 @@ class StockingRepository @Inject constructor(
 
     fun getLastUpdateTime(): Flow<LocalDateTime?> = stockingDao.getLastUpdateTime()
 
-    suspend fun refreshStockings(): Result<Unit> {
+    suspend fun refreshSinceDate(startDate: LocalDate): Result<Unit> {
         return try {
-            val startDate = LocalDate.now().minusMonths(6)
             networkDataSource.fetchStockings(startDate)
                 .map { stockings ->
                     val entities = stockings.map { StockingEntity.fromStockingInfo(it, LocalDateTime.now()) }
@@ -34,5 +33,20 @@ class StockingRepository @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    suspend fun refreshSinceLastStocking(): Result<Unit> {
+        val lastStockingDate = stockingDao.getMostRecentStockingDate()
+        val startDate = if (lastStockingDate != null) {
+            // Start from the day before the last stocking to be safe
+            lastStockingDate.minusDays(1)
+        } else {
+            LocalDate.now().minusMonths(DEFAULT_MONTHS_PAST)
+        }
+        return refreshSinceDate(startDate)
+    }
+
+    companion object {
+        const val DEFAULT_MONTHS_PAST = 6L
     }
 } 

@@ -8,6 +8,7 @@ import androidx.work.WorkerParameters
 import androidx.work.testing.TestListenableWorkerBuilder
 import com.seank.vatroutbuddy.data.repository.StockingRepository
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -28,26 +29,27 @@ class StockingUpdateWorkerTest {
     }
 
     @Test
-    fun `when refresh succeeds, worker returns success`() = runTest {
-        coEvery { repository.refreshStockings() } returns Result.success(Unit)
+    fun `worker succeeds when refresh succeeds`() = runTest {
+        coEvery { repository.refreshSinceLastStocking() } returns Result.success(Unit)
+        
         val worker = TestListenableWorkerBuilder<StockingUpdateWorker>(context)
             .setWorkerFactory(TestWorkerFactory(repository))
             .build()
-
         val result = worker.doWork()
-
+        
+        coVerify { repository.refreshSinceLastStocking() }
         assertEquals(ListenableWorker.Result.success(), result)
     }
 
     @Test
-    fun `when refresh fails, worker returns retry`() = runTest {
-        coEvery { repository.refreshStockings() } returns Result.failure(Exception("Test error"))
+    fun `worker returns retry when refresh fails`() = runTest {
+        coEvery { repository.refreshSinceLastStocking() } returns Result.failure(Exception("Test error"))
+        
         val worker = TestListenableWorkerBuilder<StockingUpdateWorker>(context)
             .setWorkerFactory(TestWorkerFactory(repository))
             .build()
-
         val result = worker.doWork()
-
+        
         assertEquals(ListenableWorker.Result.retry(), result)
     }
 }

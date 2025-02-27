@@ -62,6 +62,42 @@ class StockingDaoTest {
         assertEquals(duplicate.species, result[0].species)
     }
 
+    @Test
+    fun `getMostRecentStockingDate returns null when no stockings exist`() = runTest {
+        val result = stockingDao.getMostRecentStockingDate()
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun `getMostRecentStockingDate returns most recent date`() = runTest {
+        val today = LocalDate.now()
+        val stockings = listOf(
+            createStocking(1, today, "Lake A"),
+            createStocking(2, today.minusDays(1), "Lake B"),
+            createStocking(3, today.minusDays(7), "Lake C")
+        )
+        stockingDao.insertAll(stockings)
+
+        val result = stockingDao.getMostRecentStockingDate()
+
+        assertEquals(today, result)
+    }
+
+    @Test
+    fun `getMostRecentStockingDate handles multiple stockings on same date`() = runTest {
+        val today = LocalDate.now()
+        val stockings = listOf(
+            createStocking(1, today, "Lake A"),
+            createStocking(2, today, "Lake B"),
+            createStocking(3, today.minusDays(1), "Lake C")
+        )
+        stockingDao.insertAll(stockings)
+
+        val result = stockingDao.getMostRecentStockingDate()
+
+        assertEquals(today, result)
+    }
+
     private fun createStocking(
         id: Int,
         date: LocalDate,

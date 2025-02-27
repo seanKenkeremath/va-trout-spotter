@@ -50,7 +50,7 @@ class HomeViewModel @Inject constructor(
     fun refreshStockings() {
         isRefreshing.value = true
         viewModelScope.launch {
-            stockingRepository.refreshStockings()
+            stockingRepository.refreshSinceLastStocking()
             isRefreshing.value = false
         }
     }
