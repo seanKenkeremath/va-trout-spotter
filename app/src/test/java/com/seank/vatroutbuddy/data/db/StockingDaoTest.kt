@@ -32,7 +32,7 @@ class StockingDaoTest {
     }
 
     @Test
-    fun `getStockingsAfter returns stockings after specified date in descending order`() = runTest {
+    fun `getStockingsInRange returns stockings in specified date range in descending order`() = runTest {
         val today = LocalDate.now()
         val stockings = listOf(
             createStocking(1, today, "Lake A"),
@@ -42,10 +42,68 @@ class StockingDaoTest {
         )
         stockingDao.insertAll(stockings)
 
-        val result = stockingDao.getStockingsAfter(today.minusDays(7)).first()
+        val result = stockingDao.getStockingsInRange(
+            startDate = today.minusDays(7),
+            endDate = today
+        ).first()
 
         assertEquals(3, result.size)
         assertEquals(listOf("Lake A", "Lake B", "Lake C"), result.map { it.waterbody })
+    }
+
+    @Test
+    fun `getStockingsBeforeDate returns stockings before specified date in descending order`() = runTest {
+        val today = LocalDate.now()
+        val stockings = listOf(
+            createStocking(1, today, "Lake A"),
+            createStocking(2, today.minusDays(1), "Lake B"),
+            createStocking(3, today.minusDays(7), "Lake C"),
+            createStocking(4, today.minusDays(30), "Lake D")
+        )
+        stockingDao.insertAll(stockings)
+
+        val result = stockingDao.getStockingsBeforeDate(
+            date = today.minusDays(1),
+            limit = 10
+        ).first()
+
+        assertEquals(3, result.size)
+        assertEquals(listOf("Lake B", "Lake C", "Lake D"), result.map { it.waterbody })
+    }
+
+    @Test
+    fun `getStockingsBeforeDate with limit returns stockings before specified date in descending order`() = runTest {
+        val today = LocalDate.now()
+        val stockings = listOf(
+            createStocking(1, today, "Lake A"),
+            createStocking(2, today.minusDays(1), "Lake B"),
+            createStocking(3, today.minusDays(7), "Lake C"),
+            createStocking(4, today.minusDays(30), "Lake D")
+        )
+        stockingDao.insertAll(stockings)
+
+        val result = stockingDao.getStockingsBeforeDate(
+            date = today.minusDays(1),
+            limit = 2
+        ).first()
+
+        assertEquals(2, result.size)
+        assertEquals(listOf("Lake B", "Lake C"), result.map { it.waterbody })
+    }
+
+    @Test
+    fun `countStockingsBeforeDate returns correct count of stockings before specified date`() = runTest {
+        val today = LocalDate.now()
+        val stockings = listOf(
+            createStocking(1, today, "Lake A"),
+            createStocking(2, today.minusDays(1), "Lake B"),
+            createStocking(3, today.minusDays(7), "Lake C")
+        )
+        stockingDao.insertAll(stockings)
+
+        val count = stockingDao.countStockingsBeforeDate(today.minusDays(1))
+
+        assertEquals(2, count)
     }
 
     @Test
@@ -53,10 +111,13 @@ class StockingDaoTest {
         val date = LocalDate.now()
         val original = createStocking(1, date, "Lake A", species = listOf("Rainbow"))
         val duplicate = createStocking(2, date, "Lake A", species = listOf("Brook", "Brown"))
-        
+
         stockingDao.insertAll(listOf(original))
         stockingDao.insertAll(listOf(duplicate))
-        val result = stockingDao.getStockingsAfter(date.minusDays(1)).first()
+        val result = stockingDao.getStockingsInRange(
+            startDate = date.minusDays(1),
+            endDate = date
+        ).first()
 
         assertEquals(1, result.size)
         assertEquals(duplicate.species, result[0].species)

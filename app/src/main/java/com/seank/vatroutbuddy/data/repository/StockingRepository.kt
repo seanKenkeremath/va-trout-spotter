@@ -5,6 +5,7 @@ import com.seank.vatroutbuddy.data.db.StockingEntity
 import com.seank.vatroutbuddy.data.network.StockingNetworkDataSource
 import com.seank.vatroutbuddy.domain.model.StockingInfo
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -17,11 +18,26 @@ class StockingRepository @Inject constructor(
     private val stockingDao: StockingDao
 ) {
     fun getRecentStockings(startDate: LocalDate): Flow<List<StockingInfo>> {
-        return stockingDao.getStockingsAfter(startDate)
+        return stockingDao.getStockingsInRange(startDate, LocalDate.now())
             .map { entities -> entities.map { it.toStockingInfo() } }
     }
 
     fun getLastUpdateTime(): Flow<LocalDateTime?> = stockingDao.getLastUpdateTime()
+
+    // TODO: Check how many more stockings there are
+
+    suspend fun loadStockingsBeforeDate(date: LocalDate, limit: Int): Result<List<StockingInfo>> {
+        return try {
+            val stockings = stockingDao.getStockingsBeforeDate(date, limit).first()
+            Result.success(stockings.map { it.toStockingInfo() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun countStockingsBeforeDate(date: LocalDate): Int {
+        return stockingDao.countStockingsBeforeDate(date)
+    }
 
     suspend fun refreshSinceDate(startDate: LocalDate): Result<Unit> {
         return try {

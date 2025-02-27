@@ -6,14 +6,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -29,33 +27,32 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isLoading by viewModel.pageLoading.collectAsState()
+    val listState = remember { LazyListState() }
 
-    HomeScreen(
-        uiState = uiState,
-        onRefresh = viewModel::refreshStockings,
-        modifier = modifier
-    )
-}
-
-@Composable
-fun HomeScreen(
-    uiState: HomeUiState,
-    onRefresh: () -> Unit,
-    modifier: Modifier = Modifier
-) {
     Box(modifier = modifier.fillMaxSize()) {
-        when (uiState) {
+        when (val state = uiState) {
             HomeUiState.Loading -> LoadingState()
             HomeUiState.Empty -> EmptyState()
             is HomeUiState.Success -> {
-                Column {
-                    LastUpdatedText(
-                        lastUpdated = uiState.lastUpdatedAt,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                    val stockings = remember(uiState.stockings) { uiState.stockings }
-                    StockingList(stockings = stockings)
-                }
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    content = {
+                        items(state.stockings) { stocking ->
+                            StockingItem(stocking)
+                        }
+                        if (isLoading) {
+                            item {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .align(Alignment.Center)
+                                )
+                            }
+                        }
+                    }
+                )
             }
             is HomeUiState.Error -> {
                 Box(
@@ -63,13 +60,23 @@ fun HomeScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = uiState.message,
+                        text = state.message,
                         color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(16.dp)
                     )
                 }
             }
+        }
+
+        // Trigger pagination when scrolled to the end
+        LaunchedEffect(listState) {
+            snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == listState.layoutInfo.totalItemsCount - 1 }
+                .collect { isAtEnd ->
+                    if (isAtEnd) {
+                        viewModel.loadMoreStockings()
+                    }
+                }
         }
     }
 }
@@ -115,21 +122,6 @@ private fun LastUpdatedText(
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = modifier
     )
-}
-
-@Composable
-private fun StockingList(
-    stockings: List<StockingInfo>,
-    modifier: Modifier = Modifier
-) {
-    LazyColumn(modifier = modifier) {
-        items(
-            items = stockings,
-            key = { stocking -> "${stocking.date}_${stocking.waterbody}" }
-        ) { stocking ->
-            StockingItem(stocking = stocking)
-        }
-    }
 }
 
 @Composable
