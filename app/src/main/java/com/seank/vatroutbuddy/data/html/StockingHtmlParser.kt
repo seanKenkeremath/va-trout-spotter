@@ -26,7 +26,9 @@ object StockingHtmlParser {
                     if (waterbody == "No Stockings Today") {
                         null
                     } else {
+                        // TODO: Separate DTO fro scraping?
                         StockingInfo(
+                            id = -1, // Placeholder ID until we generate one locally
                             date = LocalDate.parse(dateText, dateFormatter),
                             county = county,
                             waterbody = cleanWaterbody,

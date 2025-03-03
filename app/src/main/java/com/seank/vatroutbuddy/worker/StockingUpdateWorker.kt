@@ -5,7 +5,6 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.seank.vatroutbuddy.data.repository.StockingRepository
-import java.time.LocalDate
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
@@ -18,7 +17,7 @@ class StockingUpdateWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         return try {
-            repository.refreshSinceLastStocking()
+            repository.fetchLatestStockings()
                 .fold(
                     onSuccess = { Result.success() },
                     onFailure = { Result.retry() }

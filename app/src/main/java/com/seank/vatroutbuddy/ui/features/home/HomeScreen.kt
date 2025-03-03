@@ -27,7 +27,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val isLoading by viewModel.pageLoading.collectAsState()
+    val pagingState by viewModel.pagingState.collectAsState()
     val listState = remember { LazyListState() }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -39,10 +39,12 @@ fun HomeScreen(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
                     content = {
-                        items(state.stockings) { stocking ->
+                        items(items = state.stockings, key = {
+                            "${it.date}, ${it.waterbody}, ${it.date}"
+                        }) { stocking ->
                             StockingItem(stocking)
                         }
-                        if (isLoading) {
+                        if (pagingState is PagingState.Loading) {
                             item {
                                 CircularProgressIndicator(
                                     modifier = Modifier
@@ -74,7 +76,7 @@ fun HomeScreen(
             snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == listState.layoutInfo.totalItemsCount - 1 }
                 .collect { isAtEnd ->
                     if (isAtEnd) {
-                        viewModel.loadMoreStockings()
+                        viewModel.loadMoreCachedStockings()
                     }
                 }
         }

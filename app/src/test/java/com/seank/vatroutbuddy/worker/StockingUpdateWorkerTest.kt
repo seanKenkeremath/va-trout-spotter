@@ -30,20 +30,20 @@ class StockingUpdateWorkerTest {
 
     @Test
     fun `worker succeeds when refresh succeeds`() = runTest {
-        coEvery { repository.refreshSinceLastStocking() } returns Result.success(Unit)
+        coEvery { repository.fetchLatestStockings() } returns Result.success(mockk())
         
         val worker = TestListenableWorkerBuilder<StockingUpdateWorker>(context)
             .setWorkerFactory(TestWorkerFactory(repository))
             .build()
         val result = worker.doWork()
         
-        coVerify { repository.refreshSinceLastStocking() }
+        coVerify { repository.fetchLatestStockings() }
         assertEquals(ListenableWorker.Result.success(), result)
     }
 
     @Test
     fun `worker returns retry when refresh fails`() = runTest {
-        coEvery { repository.refreshSinceLastStocking() } returns Result.failure(Exception("Test error"))
+        coEvery { repository.fetchLatestStockings() } returns Result.failure(Exception("Test error"))
         
         val worker = TestListenableWorkerBuilder<StockingUpdateWorker>(context)
             .setWorkerFactory(TestWorkerFactory(repository))

@@ -36,7 +36,7 @@ class StockingRepositoryTest {
                 mockStockings
             )
 
-            repository.refreshSinceLastStocking()
+            repository.fetchLatestStockings()
 
             coVerify { networkDataSource.fetchStockings(expectedStartDate) }
         }
@@ -51,7 +51,7 @@ class StockingRepositoryTest {
             mockStockings
         )
 
-        repository.refreshSinceLastStocking()
+        repository.fetchLatestStockings()
 
         coVerify { networkDataSource.fetchStockings(expectedStartDate) }
     }
@@ -66,7 +66,7 @@ class StockingRepositoryTest {
             expectedException
         )
 
-        val result = repository.refreshSinceLastStocking()
+        val result = repository.fetchLatestStockings()
 
         assert(result.isFailure)
         assertEquals(expectedException, result.exceptionOrNull())
@@ -79,6 +79,7 @@ class StockingRepositoryTest {
         coEvery { networkDataSource.fetchStockings(startDate) } returns Result.success(
             listOf(
                 StockingInfo(
+                    id = 1,
                     date = LocalDate.now(),
                     county = "Test County",
                     waterbody = "Test Waterbody",
@@ -89,8 +90,8 @@ class StockingRepositoryTest {
             )
         )
 
-        repository.refreshSinceDate(startDate)
+        repository.fetchStockingsInDateRange(startDate)
 
-        coVerify { stockingDao.insertAll(any()) }
+        coVerify { stockingDao.insertAndReturnStockings(any()) }
     }
 } 

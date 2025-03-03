@@ -9,11 +9,20 @@ import java.time.LocalDateTime
 
 @Entity(
     tableName = "stockings",
-    indices = [Index(value = ["waterbody", "date"], unique = true)]
+
+    indices = [
+        // De-dupe scraped data
+        Index(
+            value = ["date", "waterbody"],
+            unique = true
+        ),
+        // Index for pagination
+        Index(value = ["date", "waterbody", "id"])
+    ],
 )
 data class StockingEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    val id: Long = 0,
     val date: LocalDate,
     val county: String,
     val waterbody: String,
@@ -23,6 +32,7 @@ data class StockingEntity(
     val lastUpdated: LocalDateTime
 ) {
     fun toStockingInfo() = StockingInfo(
+        id = id,
         date = date,
         county = county,
         waterbody = waterbody,

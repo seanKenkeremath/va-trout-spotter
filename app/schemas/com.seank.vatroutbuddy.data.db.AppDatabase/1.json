@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "c20f2efba7ceab695f4c7d63ad872a28",
+    "identityHash": "da5fc4352dd83f7c5f5807a1df2bdc82",
     "entities": [
       {
         "tableName": "stockings",
@@ -65,14 +65,25 @@
         },
         "indices": [
           {
-            "name": "index_stockings_waterbody_date",
+            "name": "index_stockings_date_waterbody",
             "unique": true,
             "columnNames": [
-              "waterbody",
-              "date"
+              "date",
+              "waterbody"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_stockings_waterbody_date` ON `${TABLE_NAME}` (`waterbody`, `date`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_stockings_date_waterbody` ON `${TABLE_NAME}` (`date`, `waterbody`)"
+          },
+          {
+            "name": "index_stockings_date_waterbody_id",
+            "unique": false,
+            "columnNames": [
+              "date",
+              "waterbody",
+              "id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_stockings_date_waterbody_id` ON `${TABLE_NAME}` (`date`, `waterbody`, `id`)"
           }
         ],
         "foreignKeys": []
@@ -81,7 +92,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c20f2efba7ceab695f4c7d63ad872a28')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'da5fc4352dd83f7c5f5807a1df2bdc82')"
     ]
   }
 }

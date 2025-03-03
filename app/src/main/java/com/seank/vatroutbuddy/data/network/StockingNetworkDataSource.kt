@@ -16,13 +16,22 @@ class StockingNetworkDataSource @Inject constructor() {
         private val URL_DATE_FORMATTER = DateTimeFormatter.ofPattern("MMMM d, yyyy")
     }
 
-    suspend fun fetchStockings(startDate: LocalDate): Result<List<StockingInfo>> = 
+    suspend fun fetchStockings(
+        startDate: LocalDate,
+        endDate: LocalDate? = null
+    ): Result<List<StockingInfo>> =
         withContext(Dispatchers.IO) {
             runCatching {
-                val formattedDate = startDate.format(URL_DATE_FORMATTER)
-                val encodedDate = URLEncoder.encode(formattedDate, "UTF-8")
-                val url = "$STOCKING_URL?start_date=$encodedDate&end_date="
-                
+                val encodedStartDate = URLEncoder.encode(
+                    startDate.format(URL_DATE_FORMATTER), "UTF-8"
+                )
+                val encodedEndDate = if (endDate != null) {
+                    URLEncoder.encode(endDate.format(URL_DATE_FORMATTER), "UTF-8")
+                } else {
+                    ""
+                }
+                val url = "$STOCKING_URL?start_date=$encodedStartDate&end_date=$encodedEndDate"
+
                 val doc = Jsoup.connect(url).get()
                 StockingHtmlParser.parse(doc)
             }

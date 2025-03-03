@@ -4,9 +4,6 @@ import com.seank.vatroutbuddy.data.db.StockingDao
 import com.seank.vatroutbuddy.data.db.StockingEntity
 import com.seank.vatroutbuddy.data.network.StockingNetworkDataSource
 import com.seank.vatroutbuddy.domain.model.StockingInfo
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -17,41 +14,30 @@ class StockingRepository @Inject constructor(
     private val networkDataSource: StockingNetworkDataSource,
     private val stockingDao: StockingDao
 ) {
-    fun getRecentStockings(startDate: LocalDate): Flow<List<StockingInfo>> {
-        return stockingDao.getStockingsInRange(startDate, LocalDate.now())
-            .map { entities -> entities.map { it.toStockingInfo() } }
-    }
 
-    fun getLastUpdateTime(): Flow<LocalDateTime?> = stockingDao.getLastUpdateTime()
-
-    // TODO: Check how many more stockings there are
-
-    suspend fun loadStockingsBeforeDate(date: LocalDate, limit: Int): Result<List<StockingInfo>> {
+    // Load stocking data from the network and store it in the database
+    suspend fun fetchStockingsInDateRange(
+        startDate: LocalDate,
+        endDate: LocalDate? = null
+    ): Result<List<StockingInfo>> {
         return try {
-            val stockings = stockingDao.getStockingsBeforeDate(date, limit).first()
-            Result.success(stockings.map { it.toStockingInfo() })
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun countStockingsBeforeDate(date: LocalDate): Int {
-        return stockingDao.countStockingsBeforeDate(date)
-    }
-
-    suspend fun refreshSinceDate(startDate: LocalDate): Result<Unit> {
-        return try {
-            networkDataSource.fetchStockings(startDate)
-                .map { stockings ->
-                    val entities = stockings.map { StockingEntity.fromStockingInfo(it, LocalDateTime.now()) }
-                    stockingDao.insertAll(entities)
+            val entities = networkDataSource.fetchStockings(
+                startDate = startDate,
+                endDate = endDate
+            )
+                .getOrThrow()
+                .map {
+                    StockingEntity.fromStockingInfo(it, LocalDateTime.now())
                 }
+            val stockingInfos = stockingDao.insertAndReturnStockings(entities)
+            Result.success(stockingInfos.map { it.toStockingInfo() })
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    suspend fun refreshSinceLastStocking(): Result<Unit> {
+    // Load the latest stocking data from the network and store it in the database
+    suspend fun fetchLatestStockings(): Result<List<StockingInfo>> {
         val lastStockingDate = stockingDao.getMostRecentStockingDate()
         val startDate = if (lastStockingDate != null) {
             // Start from the day before the last stocking to be safe
@@ -59,10 +45,57 @@ class StockingRepository @Inject constructor(
         } else {
             LocalDate.now().minusMonths(DEFAULT_MONTHS_PAST)
         }
-        return refreshSinceDate(startDate)
+        return fetchStockingsInDateRange(startDate)
     }
 
+    suspend fun loadCachedStockings(pageSize: Int): Result<StockingsListPage> {
+        return try {
+            val stockings = stockingDao.getMostRecentStockings(limit = pageSize + 1)
+            val hasMore = stockings.size > pageSize
+            val pageStockings = stockings.take(pageSize)
+            Result.success(
+                StockingsListPage(
+                    stockings = pageStockings.map { it.toStockingInfo() },
+                    hasMore = hasMore
+                )
+            )
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun loadMoreCachedStockings(
+        lastDate: LocalDate,
+        lastWaterbody: String,
+        lastId: Long,
+        pageSize: Int
+    ): Result<StockingsListPage> {
+        return try {
+            val stockings = stockingDao.getStockingsPaged(
+                lastDate = lastDate,
+                lastWaterbody = lastWaterbody,
+                lastId = lastId,
+                pageSize = pageSize + 1
+            )
+            val hasMore = stockings.size > pageSize
+            val pageStockings = stockings.take(pageSize)
+            Result.success(
+                StockingsListPage(
+                    stockings = pageStockings.map { it.toStockingInfo() },
+                    hasMore = hasMore
+                )
+            )
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    class StockingsListPage(
+        val stockings: List<StockingInfo>,
+        val hasMore: Boolean,
+    )
+
     companion object {
-        const val DEFAULT_MONTHS_PAST = 6L
+        const val DEFAULT_MONTHS_PAST = 12L
     }
 } 

@@ -2,8 +2,7 @@ package com.seank.vatroutbuddy.data.db
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -11,6 +10,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @RunWith(RobolectricTestRunner::class)
 class StockingDaoTest {
@@ -22,7 +22,7 @@ class StockingDaoTest {
         database = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
             AppDatabase::class.java
-        ).allowMainThreadQueries().build()
+        ).build()
         stockingDao = database.stockingDao()
     }
 
@@ -32,131 +32,91 @@ class StockingDaoTest {
     }
 
     @Test
-    fun `getStockingsInRange returns stockings in specified date range in descending order`() = runTest {
-        val today = LocalDate.now()
-        val stockings = listOf(
-            createStocking(1, today, "Lake A"),
-            createStocking(2, today.minusDays(1), "Lake B"),
-            createStocking(3, today.minusDays(7), "Lake C"),
-            createStocking(4, today.minusDays(30), "Lake D")
-        )
-        stockingDao.insertAll(stockings)
-
-        val result = stockingDao.getStockingsInRange(
-            startDate = today.minusDays(7),
-            endDate = today
-        ).first()
-
-        assertEquals(3, result.size)
-        assertEquals(listOf("Lake A", "Lake B", "Lake C"), result.map { it.waterbody })
+    fun `insertStockings inserts stockings and returns their ids`() = runBlocking {
+        val stocking = createStocking(1, LocalDate.now(), "Lake A")
+        val ids = stockingDao.insertStockings(listOf(stocking))
+        assertEquals(1, ids.size)
     }
 
     @Test
-    fun `getStockingsBeforeDate returns stockings before specified date in descending order`() = runTest {
+    fun `getMostRecentStockings returns the most recent stockings`() = runBlocking {
         val today = LocalDate.now()
         val stockings = listOf(
             createStocking(1, today, "Lake A"),
             createStocking(2, today.minusDays(1), "Lake B"),
-            createStocking(3, today.minusDays(7), "Lake C"),
-            createStocking(4, today.minusDays(30), "Lake D")
+            createStocking(3, today.minusDays(2), "Lake C"),
+            createStocking(4, today.minusDays(3), "Lake D"),
+            createStocking(5, today.minusDays(4), "Lake E")
         )
-        stockingDao.insertAll(stockings)
+        stockingDao.insertStockings(stockings)
 
-        val result = stockingDao.getStockingsBeforeDate(
-            date = today.minusDays(1),
-            limit = 10
-        ).first()
-
-        assertEquals(3, result.size)
-        assertEquals(listOf("Lake B", "Lake C", "Lake D"), result.map { it.waterbody })
-    }
-
-    @Test
-    fun `getStockingsBeforeDate with limit returns stockings before specified date in descending order`() = runTest {
-        val today = LocalDate.now()
-        val stockings = listOf(
-            createStocking(1, today, "Lake A"),
-            createStocking(2, today.minusDays(1), "Lake B"),
-            createStocking(3, today.minusDays(7), "Lake C"),
-            createStocking(4, today.minusDays(30), "Lake D")
-        )
-        stockingDao.insertAll(stockings)
-
-        val result = stockingDao.getStockingsBeforeDate(
-            date = today.minusDays(1),
-            limit = 2
-        ).first()
-
+        val result = stockingDao.getMostRecentStockings(limit = 2)
         assertEquals(2, result.size)
-        assertEquals(listOf("Lake B", "Lake C"), result.map { it.waterbody })
+        assertEquals("Lake A", result[0].waterbody)
+        assertEquals("Lake B", result[1].waterbody)
     }
 
     @Test
-    fun `countStockingsBeforeDate returns correct count of stockings before specified date`() = runTest {
-        val today = LocalDate.now()
-        val stockings = listOf(
-            createStocking(1, today, "Lake A"),
-            createStocking(2, today.minusDays(1), "Lake B"),
-            createStocking(3, today.minusDays(7), "Lake C")
-        )
-        stockingDao.insertAll(stockings)
-
-        val count = stockingDao.countStockingsBeforeDate(today.minusDays(1))
-
-        assertEquals(2, count)
-    }
-
-    @Test
-    fun `insertAll replaces duplicates based on waterbody and date`() = runTest {
-        val date = LocalDate.now()
-        val original = createStocking(1, date, "Lake A", species = listOf("Rainbow"))
-        val duplicate = createStocking(2, date, "Lake A", species = listOf("Brook", "Brown"))
-
-        stockingDao.insertAll(listOf(original))
-        stockingDao.insertAll(listOf(duplicate))
-        val result = stockingDao.getStockingsInRange(
-            startDate = date.minusDays(1),
-            endDate = date
-        ).first()
-
-        assertEquals(1, result.size)
-        assertEquals(duplicate.species, result[0].species)
-    }
-
-    @Test
-    fun `getMostRecentStockingDate returns null when no stockings exist`() = runTest {
+    fun `getMostRecentStockingDate returns null when no stockings exist`() = runBlocking {
         val result = stockingDao.getMostRecentStockingDate()
         assertEquals(null, result)
     }
 
     @Test
-    fun `getMostRecentStockingDate returns most recent date`() = runTest {
+    fun `getMostRecentStockingDate returns most recent date`() = runBlocking {
         val today = LocalDate.now()
         val stockings = listOf(
             createStocking(1, today, "Lake A"),
             createStocking(2, today.minusDays(1), "Lake B"),
             createStocking(3, today.minusDays(7), "Lake C")
         )
-        stockingDao.insertAll(stockings)
+        stockingDao.insertStockings(stockings)
 
         val result = stockingDao.getMostRecentStockingDate()
-
         assertEquals(today, result)
     }
 
     @Test
-    fun `getMostRecentStockingDate handles multiple stockings on same date`() = runTest {
-        val today = LocalDate.now()
+    fun `getStockingsById returns stockings by their ids`() = runBlocking {
         val stockings = listOf(
-            createStocking(1, today, "Lake A"),
-            createStocking(2, today, "Lake B"),
-            createStocking(3, today.minusDays(1), "Lake C")
+            createStocking(1, LocalDate.now(), "Lake A"),
+            createStocking(2, LocalDate.now(), "Lake B"),
+            createStocking(3, LocalDate.now().minusDays(1), "Lake C")
         )
-        stockingDao.insertAll(stockings)
+        val ids = stockingDao.insertStockings(stockings)
 
-        val result = stockingDao.getMostRecentStockingDate()
+        val result = stockingDao.getStockingsById(ids.take(2)) // Fetching only the first two entries
+        assertEquals(2, result.size)
+        assertEquals("Lake A", result[0].waterbody)
+        assertEquals("Lake B", result[1].waterbody)
+    }
 
-        assertEquals(today, result)
+    @Test
+    fun `insertAndReturnStockings inserts and returns the inserted stockings`() = runBlocking {
+        val stocking = createStocking(1, LocalDate.now(), "Lake A")
+        val result = stockingDao.insertAndReturnStockings(listOf(stocking))
+
+        assertEquals(1, result.size)
+        assertEquals("Lake A", result[0].waterbody)
+    }
+
+    @Test
+    fun `getStockingsPaged returns paged stockings based on criteria`() = runBlocking {
+        val today = LocalDate.now()
+        val stocking1 = createStocking(1, today, "Lake A")
+        val stocking2 = createStocking(2, today, "Lake B")
+        val stocking3 = createStocking(3, today.minusDays(1), "Lake C")
+        stockingDao.insertStockings(listOf(stocking1, stocking2, stocking3))
+
+        val result = stockingDao.getStockingsPaged(
+            lastDate = today,
+            lastWaterbody = "Lake A",
+            lastId = 1,
+            pageSize = 2
+        )
+        assertEquals(2, result.size)
+        assertEquals("Lake B", result[0].waterbody)
+        assertEquals("Lake C", result[1].waterbody)
     }
 
     private fun createStocking(
@@ -168,13 +128,13 @@ class StockingDaoTest {
         species: List<String> = listOf("Rainbow"),
         isNationalForest: Boolean = false
     ) = StockingEntity(
-        id = id,
+        id = id.toLong(),
         date = date,
         county = county,
         waterbody = waterbody,
         category = category,
         species = species,
         isNationalForest = isNationalForest,
-        lastUpdated = date.atStartOfDay()
+        lastUpdated = LocalDateTime.now()
     )
-} 
+}
