@@ -17,7 +17,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val stockingRepository: StockingRepository
 ) : ViewModel() {
-    private val isRefreshing = MutableStateFlow(false)
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState = _uiState.asStateFlow()
     private val _pagingState = MutableStateFlow<PagingState>(PagingState.Idle)
@@ -34,13 +35,13 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun fetchLatestStockings() {
-        isRefreshing.value = true
+        _isRefreshing.value = true
         if (allStockings.isEmpty()) {
             _uiState.value = HomeUiState.Loading
         }
         viewModelScope.launch {
             val result = stockingRepository.fetchLatestStockings()
-            isRefreshing.value = false
+            _isRefreshing.value = false
             val stockings = result.getOrNull()
             if (stockings == null) {
                 // TODO: error handling

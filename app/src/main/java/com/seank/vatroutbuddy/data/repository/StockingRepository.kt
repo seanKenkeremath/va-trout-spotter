@@ -13,6 +13,7 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.seank.vatroutbuddy.AppConfig
+import com.seank.vatroutbuddy.domain.model.StockingsListPage
 
 @Singleton
 class StockingRepository @Inject constructor(
@@ -116,8 +117,4 @@ class StockingRepository @Inject constructor(
         }
     }
 
-    class StockingsListPage(
-        val stockings: List<StockingInfo>,
-        val hasMore: Boolean
-    )
-} 
+}
