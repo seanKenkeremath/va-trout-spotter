@@ -2,7 +2,6 @@ package com.seank.vatroutbuddy.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -15,11 +14,6 @@ enum class NavigationItem(
         route = NavigationRoutes.Home.route,
         icon = Icons.Default.Home,
         label = "Home"
-    ),
-    Dashboard(
-        route = NavigationRoutes.Locations.route,
-        icon = Icons.Default.LocationOn,
-        label = "Location"
     ),
     Notifications(
         route = NavigationRoutes.Notifications.route,

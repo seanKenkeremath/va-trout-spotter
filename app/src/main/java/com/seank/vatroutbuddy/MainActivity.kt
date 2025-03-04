@@ -17,7 +17,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.seank.vatroutbuddy.ui.features.home.HomeScreen
-import com.seank.vatroutbuddy.ui.features.locations.DashboardScreen
 import com.seank.vatroutbuddy.ui.features.notifications.NotificationsScreen
 import com.seank.vatroutbuddy.ui.navigation.NavigationItem
 import com.seank.vatroutbuddy.ui.navigation.NavigationRoutes
@@ -71,9 +70,6 @@ fun MainScreen() {
         ) {
             composable(NavigationRoutes.Home.route) {
                 HomeScreen()
-            }
-            composable(NavigationRoutes.Locations.route) {
-                DashboardScreen()
             }
             composable(NavigationRoutes.Notifications.route) {
                 NotificationsScreen()
