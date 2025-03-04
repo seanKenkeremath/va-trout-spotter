@@ -7,6 +7,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.ExistingWorkPolicy
+import com.seank.vatroutbuddy.AppConfig
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,7 +22,7 @@ class StockingWorkScheduler @Inject constructor(
             .build()
 
         val workRequest = PeriodicWorkRequestBuilder<StockingUpdateWorker>(
-            repeatInterval = 12,
+            repeatInterval = AppConfig.BACKGROUND_FETCH_FREQUENCY_HOURS,
             repeatIntervalTimeUnit = TimeUnit.HOURS
         )
             .setConstraints(constraints)

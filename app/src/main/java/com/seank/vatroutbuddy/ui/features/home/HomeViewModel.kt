@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.seank.vatroutbuddy.data.repository.StockingRepository
 import com.seank.vatroutbuddy.domain.model.StockingInfo
+import com.seank.vatroutbuddy.AppConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,7 +56,7 @@ class HomeViewModel @Inject constructor(
 
     private fun loadCachedStockings() {
         viewModelScope.launch {
-            val loadResult = stockingRepository.loadSavedStockings(PAGE_SIZE)
+            val loadResult = stockingRepository.loadSavedStockings(AppConfig.DEFAULT_PAGE_SIZE)
             val page = loadResult.getOrNull()
             if (page == null) {
                 // TODO: Error handling
@@ -91,7 +92,7 @@ class HomeViewModel @Inject constructor(
                 lastDate = lastStocking.date,
                 lastWaterbody = lastStocking.waterbody,
                 lastId = lastStocking.id,
-                pageSize = PAGE_SIZE
+                pageSize = AppConfig.DEFAULT_PAGE_SIZE
             )
             
             val page = result.getOrNull()
@@ -126,10 +127,6 @@ class HomeViewModel @Inject constructor(
                 stockings = allStockings.toList()
             )
         }
-    }
-
-    companion object {
-        private const val PAGE_SIZE = 30
     }
 }
 

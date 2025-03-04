@@ -10,9 +10,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Month
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.seank.vatroutbuddy.AppConfig
 
 @Singleton
 class StockingRepository @Inject constructor(
@@ -52,7 +52,7 @@ class StockingRepository @Inject constructor(
             // Start from the day before the last stocking to be safe
             lastStockingDate.minusDays(1)
         } else {
-            LocalDate.now().minusMonths(DEFAULT_MONTHS_PAST)
+            LocalDate.now().minusMonths(AppConfig.DEFAULT_MONTHS_PAST)
         }
         fetchStockingsInDateRange(startDate)
     }
@@ -102,7 +102,7 @@ class StockingRepository @Inject constructor(
 
     suspend fun fetchHistoricalData(): Result<List<StockingInfo>> = withContext(ioDispatcher) {
         try {
-            val startDate = LocalDate.of(2018, Month.OCTOBER, 1)
+            val startDate = AppConfig.HISTORICAL_DATA_START_DATE
             val endDate = stockingDao.getEarliestStockingDate() ?: LocalDate.now()
 
             fetchStockingsInDateRange(startDate, endDate)
@@ -120,8 +120,4 @@ class StockingRepository @Inject constructor(
         val stockings: List<StockingInfo>,
         val hasMore: Boolean
     )
-
-    companion object {
-        const val DEFAULT_MONTHS_PAST = 12L
-    }
 } 

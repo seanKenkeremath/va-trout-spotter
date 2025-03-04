@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import com.seank.vatroutbuddy.AppConfig
 import com.seank.vatroutbuddy.data.db.AppDatabase
 import com.seank.vatroutbuddy.data.db.StockingDao
 import com.seank.vatroutbuddy.data.db.StockingEntity
@@ -104,7 +105,7 @@ class StockingRepositoryTest {
 
     @Test
     fun `refreshSinceLastStocking uses default months past when no stockings exist`() = runTest {
-        val expectedStartDate = LocalDate.now().minusMonths(StockingRepository.DEFAULT_MONTHS_PAST)
+        val expectedStartDate = LocalDate.now().minusMonths(AppConfig.DEFAULT_MONTHS_PAST)
         assertEquals(null, stockingDao.getMostRecentStockingDate())
 
         coEvery { networkDataSource.fetchStockings(expectedStartDate) } returns Result.success(
@@ -118,7 +119,7 @@ class StockingRepositoryTest {
 
     @Test
     fun `refreshSinceLastStocking returns failure when network call fails`() = runTest {
-        val expectedStartDate = LocalDate.now().minusMonths(StockingRepository.DEFAULT_MONTHS_PAST)
+        val expectedStartDate = LocalDate.now().minusMonths(AppConfig.DEFAULT_MONTHS_PAST)
         val expectedException = Exception("Network error")
 
         coEvery { networkDataSource.fetchStockings(expectedStartDate) } returns Result.failure(
