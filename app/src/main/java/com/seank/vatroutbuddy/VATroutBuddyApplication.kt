@@ -13,5 +13,6 @@ class VATroutBuddyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         stockingWorkScheduler.schedulePeriodicWork()
+        stockingWorkScheduler.scheduleHistoricalDataDownload()
     }
 } 

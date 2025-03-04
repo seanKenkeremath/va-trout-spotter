@@ -76,7 +76,7 @@ fun HomeScreen(
             snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == listState.layoutInfo.totalItemsCount - 1 }
                 .collect { isAtEnd ->
                     if (isAtEnd) {
-                        viewModel.loadMoreCachedStockings()
+                        viewModel.loadMoreStockings()
                     }
                 }
         }

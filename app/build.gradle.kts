@@ -107,4 +107,6 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.room.testing)
+
+    implementation(libs.androidx.datastore.preferences)
 }

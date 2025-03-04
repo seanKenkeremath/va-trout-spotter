@@ -44,4 +44,7 @@ interface StockingDao {
         lastId: Long,
         pageSize: Int
     ): List<StockingEntity>
+
+    @Query("SELECT MIN(date) FROM stockings")
+    suspend fun getEarliestStockingDate(): LocalDate?
 } 
