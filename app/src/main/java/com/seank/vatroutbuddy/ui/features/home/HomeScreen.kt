@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.seank.vatroutbuddy.ui.features.home
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,17 +43,35 @@ fun HomeScreen(
             HomeUiState.Loading -> LoadingState()
             HomeUiState.Empty -> EmptyState()
             is HomeUiState.Success -> {
+                val groupedStockings by remember(state.stockings) {
+                    mutableStateOf(state.stockings.groupBy { it.date })
+                }
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
                     content = {
-                        items(items = state.stockings, key = {
-                            "${it.date}, ${it.waterbody}, ${it.date}"
-                        }) { stocking ->
-                            StockingItem(
-                                stocking = stocking,
-                                onClick = { onStockingClick(stocking) }
-                            )
+                        for ((date, stockings) in groupedStockings) {
+                            stickyHeader {
+                                Surface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+
+                                ) {
+                                    Text(
+                                        text = date.format(DateTimeFormatter.ofPattern("MMM d, yyyy")),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                }
+                            }
+                            items(items = stockings, key = {
+                                "${it.date}, ${it.waterbody}, ${it.date}"
+                            }) { stocking ->
+                                StockingItem(
+                                    stocking = stocking,
+                                    onClick = { onStockingClick(stocking) }
+                                )
+                            }
                         }
                         if (pagingState is PagingState.Loading) {
                             item {
@@ -63,6 +85,7 @@ fun HomeScreen(
                     }
                 )
             }
+
             is HomeUiState.Error -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -124,7 +147,7 @@ private fun LastUpdatedText(
         val formatter = DateTimeFormatter.ofPattern("MMM d, h:mm a")
         lastUpdated.format(formatter)
     }
-    
+
     Text(
         text = "Last updated: $formattedTime",
         style = MaterialTheme.typography.bodySmall,
@@ -150,11 +173,6 @@ private fun StockingItem(
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            Text(
-                text = stocking.date.format(DateTimeFormatter.ofPattern("MMM d, yyyy")),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "${stocking.waterbody}, ${stocking.county}",
                 style = MaterialTheme.typography.bodyLarge
