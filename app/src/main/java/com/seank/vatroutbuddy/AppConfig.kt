@@ -15,4 +15,7 @@ object AppConfig {
 
     // Periodic background fetch config
     const val BACKGROUND_FETCH_FREQUENCY_HOURS = 12L
+
+    // Animations
+    const val MODAL_ANIMATION_DURATION = 300
 } 

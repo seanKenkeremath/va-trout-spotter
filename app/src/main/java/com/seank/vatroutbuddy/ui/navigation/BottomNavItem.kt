@@ -19,11 +19,5 @@ enum class BottomNavItem(
         route = NavigationRoutes.Notifications.route,
         icon = Icons.Default.Notifications,
         label = "Notifications"
-    );
-
-    companion object {
-        fun fromRoute(route: String?): BottomNavItem? {
-            return entries.firstOrNull { it.route == route }
-        }
-    }
+    )
 } 
