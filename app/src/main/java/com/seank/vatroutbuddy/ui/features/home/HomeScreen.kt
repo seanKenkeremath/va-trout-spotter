@@ -2,12 +2,15 @@ package com.seank.vatroutbuddy.ui.features.home
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,6 +26,7 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun HomeScreen(
+    onStockingClick: (StockingInfo) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -42,7 +46,10 @@ fun HomeScreen(
                         items(items = state.stockings, key = {
                             "${it.date}, ${it.waterbody}, ${it.date}"
                         }) { stocking ->
-                            StockingItem(stocking)
+                            StockingItem(
+                                stocking = stocking,
+                                onClick = { onStockingClick(stocking) }
+                            )
                         }
                         if (pagingState is PagingState.Loading) {
                             item {
@@ -127,34 +134,36 @@ private fun LastUpdatedText(
 }
 
 @Composable
-private fun StockingItem(stocking: StockingInfo) {
-    Column(
-        modifier = Modifier
-            .padding(vertical = 8.dp)
-            .fillMaxWidth()
+private fun StockingItem(
+    stocking: StockingInfo,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth(),
+        onClick = onClick
     ) {
-        Text(
-            text = stocking.date.format(DateTimeFormatter.ofPattern("MMM d, yyyy")),
-            style = MaterialTheme.typography.titleMedium
-        )
-        Text(
-            text = "${stocking.waterbody}, ${stocking.county}",
-            style = MaterialTheme.typography.bodyLarge
-        )
-        if (stocking.isNationalForest) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
             Text(
-                text = "National Forest Water",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.secondary
+                text = stocking.date.format(DateTimeFormatter.ofPattern("MMM d, yyyy")),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "${stocking.waterbody}, ${stocking.county}",
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Species: ${stocking.species.joinToString(", ")}",
+                style = MaterialTheme.typography.bodyMedium
             )
         }
-        Text(
-            text = "Category: ${stocking.category}",
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            text = "Species: ${stocking.species.joinToString(", ")}",
-            style = MaterialTheme.typography.bodyMedium
-        )
     }
 } 

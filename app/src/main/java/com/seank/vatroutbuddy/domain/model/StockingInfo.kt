@@ -1,7 +1,10 @@
 package com.seank.vatroutbuddy.domain.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import java.time.LocalDate
 
+@Parcelize
 data class StockingInfo(
     val id: Long,
     val date: LocalDate,
@@ -10,4 +13,4 @@ data class StockingInfo(
     val category: String,
     val species: List<String>,
     val isNationalForest: Boolean
-)
+) : Parcelable

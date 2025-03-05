@@ -5,13 +5,13 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.ui.graphics.vector.ImageVector
 
-enum class NavigationItem(
+enum class BottomNavItem(
     val route: String,
     val icon: ImageVector,
     val label: String
 ) {
     Home(
-        route = NavigationRoutes.Home.route,
+        route = NavigationRoutes.Stockings.route,
         icon = Icons.Default.Home,
         label = "Home"
     ),
@@ -22,7 +22,7 @@ enum class NavigationItem(
     );
 
     companion object {
-        fun fromRoute(route: String?): NavigationItem? {
+        fun fromRoute(route: String?): BottomNavItem? {
             return entries.firstOrNull { it.route == route }
         }
     }

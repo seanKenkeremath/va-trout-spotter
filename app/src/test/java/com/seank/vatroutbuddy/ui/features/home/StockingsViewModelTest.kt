@@ -23,7 +23,7 @@ import org.junit.Test
 import java.time.LocalDate
 
 @ExperimentalCoroutinesApi
-class HomeViewModelTest {
+class StockingsViewModelTest {
 
     private lateinit var viewModel: HomeViewModel
     private lateinit var repository: StockingRepository
