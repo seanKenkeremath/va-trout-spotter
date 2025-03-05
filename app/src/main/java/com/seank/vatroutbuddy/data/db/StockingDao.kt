@@ -50,7 +50,4 @@ interface StockingDao {
 
     @Query("SELECT * FROM stockings WHERE waterbody = :waterbody ORDER BY date DESC LIMIT :limit")
     suspend fun getStockingsByWaterbody(waterbody: String, limit: Int): List<StockingEntity>
-
-    @Query("SELECT * FROM stockings WHERE waterbody = :waterbody AND id != :excludeId ORDER BY date DESC LIMIT :limit")
-    suspend fun getStockingsByWaterbodyExcluding(waterbody: String, excludeId: Long, limit: Int): List<StockingEntity>
 } 

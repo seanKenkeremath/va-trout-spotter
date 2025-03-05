@@ -201,12 +201,12 @@ class StockingRepositoryTest {
 
     @Test
     fun `fetchHistoricalData uses current date when no stockings exist`() = runTest {
-        val today = LocalDate.of(2025, 3, 4)
+        val today = LocalDate.now()
         val expectedStartDate = LocalDate.of(2018, Month.OCTOBER, 1)
         val stockings = listOf(
             StockingInfo(
                 id = 1,
-                date = LocalDate.now(),
+                date = today,
                 county = "Test County",
                 waterbody = "Historical Waterbody",
                 category = "A",

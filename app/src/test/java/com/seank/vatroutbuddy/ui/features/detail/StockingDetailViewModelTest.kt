@@ -48,7 +48,7 @@ class StockingDetailViewModelTest {
             createMockStocking(789L, "Lake Test")
         )
         
-        coEvery { repository.getStockingsByWaterbody("Lake Test", any(), testStocking.id) } returns 
+        coEvery { repository.getStockingsByWaterbody("Lake Test", any()) } returns
             Result.success(relatedStockings)
         
         viewModel = StockingDetailViewModel(testStocking, repository)
@@ -65,7 +65,7 @@ class StockingDetailViewModelTest {
             createMockStocking(789L, "Lake Test")
         )
         
-        coEvery { repository.getStockingsByWaterbody("Lake Test", any(), testStocking.id) } returns 
+        coEvery { repository.getStockingsByWaterbody("Lake Test", any()) } returns
             Result.success(relatedStockings)
         
         viewModel = StockingDetailViewModel(testStocking, repository)
@@ -87,7 +87,7 @@ class StockingDetailViewModelTest {
         val savedStateHandle = SavedStateHandle(mapOf("stocking" to testStocking))
         val errorMessage = "Stocking not found"
         
-        coEvery { repository.getStockingsByWaterbody("Lake Test", any(), testStocking.id) } returns 
+        coEvery { repository.getStockingsByWaterbody("Lake Test", any()) } returns
             Result.failure(Exception(errorMessage))
         
         viewModel = StockingDetailViewModel(testStocking, repository)
@@ -107,7 +107,7 @@ class StockingDetailViewModelTest {
         val errorMessage = "Network error"
         
         // First attempt fails
-        coEvery { repository.getStockingsByWaterbody("Lake Test", any(), testStocking.id) } returns 
+        coEvery { repository.getStockingsByWaterbody("Lake Test", any()) } returns
             Result.failure(Exception(errorMessage))
         
         viewModel = StockingDetailViewModel(testStocking, repository)
@@ -119,7 +119,7 @@ class StockingDetailViewModelTest {
         // Setup success for retry
         val relatedStockings = listOf(createMockStocking(456L, "Lake Test"))
         
-        coEvery { repository.getStockingsByWaterbody("Lake Test", any(), testStocking.id) } returns 
+        coEvery { repository.getStockingsByWaterbody("Lake Test", any()) } returns
             Result.success(relatedStockings)
         
         // Retry

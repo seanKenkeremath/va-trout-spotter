@@ -20,22 +20,21 @@ class StockingDetailViewModel @AssistedInject constructor(
 
     private val _uiState = MutableStateFlow<StockingDetailUiState>(StockingDetailUiState.Loading)
     val uiState = _uiState.asStateFlow()
-    
+
     init {
         loadRelatedStockings()
     }
-    
+
     private fun loadRelatedStockings() {
         viewModelScope.launch {
             _uiState.value = StockingDetailUiState.Loading
-            
+
             try {
                 val relatedStockings = repository.getStockingsByWaterbody(
                     stocking.waterbody,
                     limit = 10,
-                    excludeId = stocking.id
                 ).getOrThrow()
-                
+
                 _uiState.value = StockingDetailUiState.Success(
                     stocking = stocking,
                     relatedStockings = relatedStockings
@@ -45,7 +44,7 @@ class StockingDetailViewModel @AssistedInject constructor(
             }
         }
     }
-    
+
     fun retry() {
         loadRelatedStockings()
     }
@@ -62,5 +61,6 @@ sealed class StockingDetailUiState {
         val stocking: StockingInfo,
         val relatedStockings: List<StockingInfo>
     ) : StockingDetailUiState()
+
     data class Error(val message: String) : StockingDetailUiState()
 } 

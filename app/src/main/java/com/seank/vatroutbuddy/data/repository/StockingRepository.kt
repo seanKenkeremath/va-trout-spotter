@@ -121,14 +121,9 @@ class StockingRepository @Inject constructor(
     suspend fun getStockingsByWaterbody(
         waterbody: String,
         limit: Int = 10,
-        excludeId: Long? = null
     ): Result<List<StockingInfo>> = withContext(ioDispatcher) {
         try {
-            val stockings = if (excludeId != null) {
-                stockingDao.getStockingsByWaterbodyExcluding(waterbody, excludeId, limit)
-            } else {
-                stockingDao.getStockingsByWaterbody(waterbody, limit)
-            }
+            val stockings = stockingDao.getStockingsByWaterbody(waterbody, limit)
             Result.success(stockings.map { it.toStockingInfo() })
         } catch (e: Exception) {
             Result.failure(e)
