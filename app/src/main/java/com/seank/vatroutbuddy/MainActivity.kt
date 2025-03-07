@@ -48,7 +48,7 @@ import androidx.navigation.compose.rememberNavController
 import com.seank.vatroutbuddy.AppConfig.MODAL_ANIMATION_DURATION
 import com.seank.vatroutbuddy.domain.model.StockingInfo
 import com.seank.vatroutbuddy.ui.features.detail.StockingDetailScreen
-import com.seank.vatroutbuddy.ui.features.home.HomeScreen
+import com.seank.vatroutbuddy.ui.features.stockings.HomeScreen
 import com.seank.vatroutbuddy.ui.features.notifications.NotificationsScreen
 import com.seank.vatroutbuddy.ui.navigation.BottomNavItem
 import com.seank.vatroutbuddy.ui.navigation.NavigationRoutes

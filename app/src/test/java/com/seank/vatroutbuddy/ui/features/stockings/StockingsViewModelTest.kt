@@ -1,4 +1,4 @@
-package com.seank.vatroutbuddy.ui.features.home
+package com.seank.vatroutbuddy.ui.features.stockings
 
 import StockingFilters
 import com.seank.vatroutbuddy.data.repository.StockingRepository

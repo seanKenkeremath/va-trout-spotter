@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalFoundationApi::class)
 
-package com.seank.vatroutbuddy.ui.features.home
+package com.seank.vatroutbuddy.ui.features.stockings
 
 import FilterBottomSheet
 import androidx.compose.foundation.ExperimentalFoundationApi
