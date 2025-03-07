@@ -23,9 +23,10 @@ One of the reasons I created this app, other than my own trout fishing aspiratio
 ## TODO
 
  - Implement actual UI (currently stubbed)
+ - Improve filter flow
  - Logo, loading animation
+ - Empty state
  - Notifications (subscribing and sending local notifications from WorkManager)
- - Filters
  - Settings screen (About, data management)
  - Sanitize locations from web scraping
  - Nightly integration tests of web scraping

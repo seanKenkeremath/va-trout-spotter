@@ -1,5 +1,6 @@
 package com.seank.vatroutbuddy.ui.features.home
 
+import StockingFilters
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.seank.vatroutbuddy.data.repository.StockingRepository
@@ -23,6 +24,10 @@ class HomeViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
     private val _pagingState = MutableStateFlow<PagingState>(PagingState.Idle)
     val pagingState = _pagingState.asStateFlow()
+    private val _filters = MutableStateFlow(StockingFilters())
+    val filters = _filters.asStateFlow()
+    private val _availableCounties = MutableStateFlow<List<String>>(emptyList())
+    val availableCounties = _availableCounties.asStateFlow()
 
     // Use TreeSet to maintain sorted unique StockingInfo
     // TODO: centralize comparison logic
@@ -32,6 +37,7 @@ class HomeViewModel @Inject constructor(
     init {
         fetchLatestStockings()
         loadCachedStockings()
+        loadFilterOptions()
     }
 
     private fun fetchLatestStockings() {
@@ -57,7 +63,11 @@ class HomeViewModel @Inject constructor(
 
     private fun loadCachedStockings() {
         viewModelScope.launch {
-            val loadResult = stockingRepository.loadSavedStockings(AppConfig.DEFAULT_PAGE_SIZE)
+            val filters = _filters.value
+            val loadResult = stockingRepository.loadSavedStockings(
+                AppConfig.DEFAULT_PAGE_SIZE,
+                filters
+            )
             val page = loadResult.getOrNull()
             if (page == null) {
                 // TODO: Error handling
@@ -93,7 +103,8 @@ class HomeViewModel @Inject constructor(
                 lastDate = lastStocking.date,
                 lastWaterbody = lastStocking.waterbody,
                 lastId = lastStocking.id,
-                pageSize = AppConfig.DEFAULT_PAGE_SIZE
+                pageSize = AppConfig.DEFAULT_PAGE_SIZE,
+                stockingFilters = _filters.value
             )
             
             val page = result.getOrNull()
@@ -128,6 +139,25 @@ class HomeViewModel @Inject constructor(
                 stockings = allStockings.toList()
             )
         }
+    }
+
+    private fun loadFilterOptions() {
+        viewModelScope.launch {
+            _availableCounties.value = stockingRepository.getAllCounties()
+        }
+    }
+
+    fun updateFilters(newFilters: StockingFilters) {
+        _filters.value = newFilters
+        // Clear existing stockings and reload with new filters
+        allStockings.clear()
+        _uiState.value = HomeUiState.Loading
+        _pagingState.value = PagingState.Idle
+        loadCachedStockings()
+    }
+
+    fun clearFilters() {
+        updateFilters(StockingFilters())
     }
 }
 

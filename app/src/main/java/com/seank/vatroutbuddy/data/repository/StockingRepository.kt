@@ -1,5 +1,6 @@
 package com.seank.vatroutbuddy.data.repository
 
+import StockingFilters
 import com.seank.vatroutbuddy.data.db.StockingDao
 import com.seank.vatroutbuddy.data.db.StockingEntity
 import com.seank.vatroutbuddy.data.network.StockingNetworkDataSource
@@ -58,10 +59,26 @@ class StockingRepository @Inject constructor(
         fetchStockingsInDateRange(startDate)
     }
 
-    suspend fun loadSavedStockings(pageSize: Int): Result<StockingsListPage> =
+    suspend fun loadSavedStockings(
+        pageSize: Int,
+        stockingFilters: StockingFilters? = null,
+    ): Result<StockingsListPage> =
         withContext(ioDispatcher) {
             try {
-                val stockings = stockingDao.getMostRecentStockings(limit = pageSize + 1)
+                val countiesQuery = if (stockingFilters?.counties?.isNotEmpty() == true) {
+                    stockingFilters.counties.toList()
+                } else {
+                    null
+                }
+
+                val stockings = stockingDao.getMostRecentStockings(
+                    limit = pageSize + 1,
+                    counties = countiesQuery,
+                    isNationalForest = stockingFilters?.isNationalForest,
+                    isHeritageDayWater = stockingFilters?.isHeritageDayWater,
+                    isNsf = stockingFilters?.isNsf,
+                    isDelayedHarvest = stockingFilters?.isDelayedHarvest
+                )
                 val hasMore = stockings.size > pageSize
                 val pageStockings = stockings.take(pageSize)
                 Result.success(
@@ -79,14 +96,25 @@ class StockingRepository @Inject constructor(
         lastDate: LocalDate,
         lastWaterbody: String,
         lastId: Long,
-        pageSize: Int
+        pageSize: Int,
+        stockingFilters: StockingFilters? = null,
     ): Result<StockingsListPage> = withContext(ioDispatcher) {
         try {
+            val countiesQuery = if (stockingFilters?.counties?.isNotEmpty() == true) {
+                stockingFilters.counties.toList()
+            } else {
+                null
+            }
             val stockings = stockingDao.getStockingsPaged(
                 lastDate = lastDate,
                 lastWaterbody = lastWaterbody,
                 lastId = lastId,
-                pageSize = pageSize + 1
+                pageSize = pageSize + 1,
+                counties = countiesQuery,
+                isNationalForest = stockingFilters?.isNationalForest,
+                isHeritageDayWater = stockingFilters?.isHeritageDayWater,
+                isNsf = stockingFilters?.isNsf,
+                isDelayedHarvest = stockingFilters?.isDelayedHarvest
             )
             val hasMore = stockings.size > pageSize
             val pageStockings = stockings.take(pageSize)
@@ -130,4 +158,11 @@ class StockingRepository @Inject constructor(
         }
     }
 
+    suspend fun getAllCounties(): List<String> = withContext(ioDispatcher) {
+        stockingDao.getAllCounties()
+    }
+
+    suspend fun getAllCategories(): List<String> = withContext(ioDispatcher) {
+        stockingDao.getAllCategories()
+    }
 }

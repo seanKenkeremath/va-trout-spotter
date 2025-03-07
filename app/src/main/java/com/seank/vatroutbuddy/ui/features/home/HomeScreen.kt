@@ -2,6 +2,7 @@
 
 package com.seank.vatroutbuddy.ui.features.home
 
+import FilterBottomSheet
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,8 +14,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,6 +43,9 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pagingState by viewModel.pagingState.collectAsState()
+    val filters by viewModel.filters.collectAsState()
+    val availableCounties by viewModel.availableCounties.collectAsState()
+    var showFilters by remember { mutableStateOf(false) }
     val listState = remember { LazyListState() }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -109,6 +119,33 @@ fun HomeScreen(
                         viewModel.loadMoreStockings()
                     }
                 }
+        }
+
+        // Add filter FAB
+        BadgedBox(
+            badge = {
+                if (filters.activeFilterCount > 0) {
+                    Badge { Text(filters.activeFilterCount.toString()) }
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
+        ) {
+            IconButton(onClick = { showFilters = true }) {
+                Icon(Icons.Default.Info, contentDescription = "Filters")
+            }
+        }
+
+        // Filter bottom sheet
+        if (showFilters) {
+            FilterBottomSheet(
+                filters = filters,
+                availableCounties = availableCounties,
+                onFiltersChanged = viewModel::updateFilters,
+                onClearFilters = viewModel::clearFilters,
+                onDismiss = { showFilters = false }
+            )
         }
     }
 }

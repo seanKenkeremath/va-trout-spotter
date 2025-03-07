@@ -151,7 +151,7 @@ class StockingRepositoryTest {
 
         repository.fetchStockingsInDateRange(startDate)
 
-        val savedStockings = stockingDao.getMostRecentStockings(2)
+        val savedStockings = stockingDao.getMostRecentStockings(limit = 2)
         assertEquals(1, savedStockings.size)
         assertEquals("New Waterbody", savedStockings[0].waterbody)
     }
@@ -171,13 +171,13 @@ class StockingRepositoryTest {
 
         coEvery { networkDataSource.fetchStockings(any(), any()) } returns Result.success(stockings)
 
-        val existingStockings = stockingDao.getMostRecentStockings(15)
+        val existingStockings = stockingDao.getMostRecentStockings(limit = 15)
         assertEquals(10, existingStockings.size)
         assertEquals(false, repository.hasHistoricalData.first())
 
         repository.fetchHistoricalData()
 
-        val updatedStockings = stockingDao.getMostRecentStockings(15)
+        val updatedStockings = stockingDao.getMostRecentStockings(limit = 15)
         assertEquals(11, updatedStockings.size)
         assertEquals("Historical Waterbody", updatedStockings[10].waterbody)
 
@@ -207,7 +207,7 @@ class StockingRepositoryTest {
         )
 
         assertEquals(null, stockingDao.getEarliestStockingDate())
-        assertEquals(0, stockingDao.getMostRecentStockings(1).size)
+        assertEquals(0, stockingDao.getMostRecentStockings(limit = 1).size)
         assertEquals(false, repository.hasHistoricalData.first())
         coEvery { networkDataSource.fetchStockings(any(), any()) } returns Result.success(stockings)
 
@@ -220,7 +220,7 @@ class StockingRepositoryTest {
             )
         }
         assertEquals(true, repository.hasHistoricalData.first())
-        assertEquals(1, stockingDao.getMostRecentStockings(2).size)
+        assertEquals(1, stockingDao.getMostRecentStockings(limit = 2).size)
     }
 
     @Test
