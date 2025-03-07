@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -117,6 +118,88 @@ class StockingDaoTest {
         assertEquals(2, result.size)
         assertEquals("Lake B", result[0].waterbody)
         assertEquals("Lake C", result[1].waterbody)
+    }
+
+    @Test
+    fun `getMostRecentStockings filters by counties`() = runBlocking {
+        val stockings = listOf(
+            createStocking(1, LocalDate.now(), "Lake A", county = "County A"),
+            createStocking(2, LocalDate.now(), "Lake B", county = "County B"),
+            createStocking(3, LocalDate.now(), "Lake C", county = "County A")
+        )
+        stockingDao.insertStockings(stockings)
+
+        val result = stockingDao.getMostRecentStockings(
+            counties = listOf("County A"),
+            limit = 10
+        )
+        
+        assertEquals(2, result.size)
+        assertTrue(result.all { it.county == "County A" })
+    }
+
+    @Test
+    fun `getMostRecentStockings filters by multiple counties`() = runBlocking {
+        val stockings = listOf(
+            createStocking(1, LocalDate.now(), "Lake A", county = "County A"),
+            createStocking(2, LocalDate.now(), "Lake B", county = "County B"),
+            createStocking(3, LocalDate.now(), "Lake C", county = "County C")
+        )
+        stockingDao.insertStockings(stockings)
+
+        val result = stockingDao.getMostRecentStockings(
+            counties = listOf("County A", "County C"),
+            limit = 10
+        )
+
+        assertEquals(2, result.size)
+        assertTrue(result.any { it.county == "County A" })
+        assertTrue(result.any { it.county == "County C" })
+    }
+
+    @Test
+    fun `getMostRecentStockings filters by multiple criteria`() = runBlocking {
+        val stockings = listOf(
+            createStocking(1, LocalDate.now(), "Lake A", isNationalForest = true, isNsf = true),
+            createStocking(2, LocalDate.now(), "Lake B", isNationalForest = true, isNsf = false),
+            createStocking(3, LocalDate.now(), "Lake C", isNationalForest = false, isNsf = false)
+        )
+        stockingDao.insertStockings(stockings)
+
+        val result = stockingDao.getMostRecentStockings(
+            isNationalForest = true,
+            isNsf = true,
+            limit = 10
+        )
+        
+        assertEquals(1, result.size)
+        assertTrue(result[0].isNationalForest)
+        assertTrue(result[0].isNsf)
+    }
+
+    @Test
+    fun `getStockingsPaged applies filters correctly`() = runBlocking {
+        val today = LocalDate.now()
+        val stockings = listOf(
+            createStocking(1, today, "Lake A", county = "County A", isHeritageDayWater = true),
+            createStocking(2, today, "Lake B", county = "County B", isHeritageDayWater = false),
+            createStocking(3, today.minusDays(1), "Lake C", county = "County A", isHeritageDayWater = true)
+        )
+        stockingDao.insertStockings(stockings)
+
+        val result = stockingDao.getStockingsPaged(
+            lastDate = today,
+            lastWaterbody = "Lake A",
+            lastId = 1,
+            counties = listOf("County A"),
+            isHeritageDayWater = true,
+            pageSize = 10
+        )
+        
+        assertEquals(1, result.size)
+        assertEquals("Lake C", result[0].waterbody)
+        assertTrue(result[0].isHeritageDayWater)
+        assertEquals("County A", result[0].county)
     }
 
     private fun createStocking(

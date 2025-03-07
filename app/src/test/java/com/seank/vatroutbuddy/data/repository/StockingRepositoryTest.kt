@@ -1,5 +1,6 @@
 package com.seank.vatroutbuddy.data.repository
 
+import StockingFilters
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
@@ -26,6 +27,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -250,6 +252,89 @@ class StockingRepositoryTest {
         repository.fetchHistoricalData()
 
         assertEquals(false, repository.hasHistoricalData.first())
+    }
+
+    @Test
+    fun `loadSavedStockings applies filters correctly`() = runTest {
+        val stockings = listOf(
+            TestFactory.createStockingEntity(
+                id = 1,
+                date = LocalDate.now(),
+                waterbody = "Lake A",
+                county = "County A",
+                isNationalForest = true
+            ),
+            TestFactory.createStockingEntity(
+                id = 2,
+                date = LocalDate.now(),
+                waterbody = "Lake B",
+                county = "County B",
+                isNationalForest = false
+            )
+        )
+        stockingDao.insertStockings(stockings)
+
+        val filters = StockingFilters(
+            isNationalForest = true
+        )
+        
+        val result = repository.loadSavedStockings(
+            pageSize = 10,
+            stockingFilters = filters
+        ).getOrNull()
+
+        assertEquals(1, result?.stockings?.size)
+        with(result!!.stockings[0]) {
+            assertEquals("County A", county)
+            assertTrue(isNationalForest)
+        }
+    }
+
+    @Test
+    fun `loadMoreSavedStockings respects existing filters`() = runTest {
+        val today = LocalDate.now()
+        val stockings = listOf(
+            TestFactory.createStockingEntity(
+                id = 1,
+                date = today,
+                waterbody = "Lake A",
+                county = "County A",
+                isHeritageDayWater = true
+            ),
+            TestFactory.createStockingEntity(
+                id = 2,
+                date = today.minusDays(1),
+                waterbody = "Lake B",
+                county = "County A",
+                isHeritageDayWater = true
+            ),
+            TestFactory.createStockingEntity(
+                id = 3,
+                date = today.minusDays(2),
+                waterbody = "Lake C",
+                county = "County B",
+                isHeritageDayWater = true
+            )
+        )
+        stockingDao.insertStockings(stockings)
+
+        val filters = StockingFilters(
+            counties = setOf("County A"),
+        )
+
+        val result = repository.loadMoreSavedStockings(
+            lastDate = today,
+            lastWaterbody = "Lake A",
+            lastId = 1,
+            pageSize = 10,
+            stockingFilters = filters
+        ).getOrNull()
+
+        assertEquals(1, result?.stockings?.size)
+        with(result!!.stockings[0]) {
+            assertEquals("County A", county)
+            assertEquals("Lake B", waterbody)
+        }
     }
 
     @After

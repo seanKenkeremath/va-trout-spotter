@@ -1,5 +1,6 @@
 package com.seank.vatroutbuddy.ui.features.home
 
+import StockingFilters
 import com.seank.vatroutbuddy.data.repository.StockingRepository
 import com.seank.vatroutbuddy.domain.model.StockingInfo
 import com.seank.vatroutbuddy.domain.model.StockingsListPage
@@ -338,14 +339,149 @@ class StockingsViewModelTest {
         assertEquals(PagingState.ReachedEnd, viewModel.pagingState.value)
     }
 
-    private fun createMockStockings(count: Int, startId: Int = 1): List<StockingInfo> {
+    @Test
+    fun `updating filters reloads stockings with new filters`() = runTest {
+        val initialStockings = createMockStockings(5)
+        val filteredStockings = createMockStockings(2, county = "Filtered County")
+        val initialPage = StockingsListPage(initialStockings, true)
+        val filteredPage = StockingsListPage(filteredStockings, false)
+
+        coEvery { repository.fetchLatestStockings() } returns Result.success(initialStockings)
+        coEvery { 
+            repository.loadSavedStockings(
+                pageSize = any(),
+                stockingFilters = any()
+            )
+        } returns Result.success(initialPage)
+        
+        val newFilters = StockingFilters(counties = setOf("Filtered County"))
+        coEvery { 
+            repository.loadSavedStockings(
+                pageSize = any(),
+                stockingFilters = eq(newFilters)
+            )
+        } returns Result.success(filteredPage)
+
+        viewModel = HomeViewModel(repository)
+        advanceUntilIdle()
+
+        // Verify initial state
+        val initialState = viewModel.uiState.value
+        assertTrue(initialState is HomeUiState.Success)
+        assertEquals(5, (initialState as HomeUiState.Success).stockings.size)
+
+        // Update filters
+        viewModel.updateFilters(newFilters)
+        advanceUntilIdle()
+
+        // Verify filtered state
+        val filteredState = viewModel.uiState.value
+        assertTrue(filteredState is HomeUiState.Success)
+        assertEquals(2, (filteredState as HomeUiState.Success).stockings.size)
+        assertTrue((filteredState).stockings.all { it.county == "Filtered County" })
+    }
+
+    @Test
+    fun `clearing filters resets to unfiltered state`() = runTest {
+        hasHistoricalDataFlow.value = true
+        val initialStockings = createMockStockings(5)
+        val filteredStockings = createMockStockings(2, county = "Filtered County")
+        val initialPage = StockingsListPage(initialStockings, true)
+        val filteredPage = StockingsListPage(filteredStockings, false)
+
+        coEvery { repository.fetchLatestStockings() } returns Result.success(initialStockings)
+        coEvery { 
+            repository.loadSavedStockings(
+                pageSize = any(),
+                stockingFilters = any()
+            )
+        } returns Result.success(initialPage)
+        
+        val filters = StockingFilters(counties = setOf("Filtered County"))
+        coEvery { 
+            repository.loadSavedStockings(
+                pageSize = any(),
+                stockingFilters = eq(filters)
+            )
+        } returns Result.success(filteredPage)
+
+        viewModel = HomeViewModel(repository)
+        advanceUntilIdle()
+
+        // Apply filters
+        viewModel.updateFilters(filters)
+        advanceUntilIdle()
+
+        // Verify filtered state
+        val filteredState = viewModel.uiState.value
+        assertTrue(filteredState is HomeUiState.Success)
+        assertEquals(2, (filteredState as HomeUiState.Success).stockings.size)
+
+        // Clear filters
+        viewModel.clearFilters()
+        advanceUntilIdle()
+
+        // Verify unfiltered state
+        val unfilteredState = viewModel.uiState.value
+        assertTrue(unfilteredState is HomeUiState.Success)
+        assertEquals(5, (unfilteredState as HomeUiState.Success).stockings.size)
+    }
+
+    @Test
+    fun `loading more stockings preserves active filters`() = runTest {
+        hasHistoricalDataFlow.value = true
+        val initialStockings = createMockStockings(5, county = "Filtered County")
+        val moreStockings = createMockStockings(3, county = "Filtered County", startId = 6)
+        val initialPage = StockingsListPage(initialStockings, true)
+        val nextPage = StockingsListPage(moreStockings, false)
+
+        val filters = StockingFilters(counties = setOf("Filtered County"))
+        
+        coEvery { repository.fetchLatestStockings() } returns Result.success(initialStockings)
+        coEvery { 
+            repository.loadSavedStockings(
+                pageSize = any(),
+                stockingFilters = eq(filters)
+            )
+        } returns Result.success(initialPage)
+        
+        coEvery {
+            repository.loadMoreSavedStockings(
+                lastDate = any(),
+                lastWaterbody = any(),
+                lastId = any(),
+                pageSize = any(),
+                stockingFilters = eq(filters)
+            )
+        } returns Result.success(nextPage)
+
+        viewModel = HomeViewModel(repository)
+        viewModel.updateFilters(filters)
+        advanceUntilIdle()
+
+        // Verify initial filtered state
+        val initialState = viewModel.uiState.value as HomeUiState.Success
+        assertEquals(5, initialState.stockings.size)
+        assertTrue(initialState.stockings.all { it.county == "Filtered County" })
+
+        // Load more
+        viewModel.loadMoreStockings()
+        advanceUntilIdle()
+
+        // Verify that new items also respect filters
+        val updatedState = viewModel.uiState.value as HomeUiState.Success
+        assertEquals(8, updatedState.stockings.size)
+        assertTrue(updatedState.stockings.all { it.county == "Filtered County" })
+    }
+
+    private fun createMockStockings(count: Int, startId: Int = 1, county: String? = null): List<StockingInfo> {
         return (startId until startId + count).map { id ->
             TestFactory.createStockingInfo(
                 id = id.toLong(),
                 date = LocalDate.now().minusDays(id.toLong()),
                 waterbody = "Lake $id",
                 species = listOf("Rainbow Trout"),
-                county = "County $id",
+                county = county ?: "County $id",
                 category = "A",
                 isNationalForest = false,
             )
