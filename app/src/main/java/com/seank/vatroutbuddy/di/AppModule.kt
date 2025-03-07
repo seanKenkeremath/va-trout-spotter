@@ -8,6 +8,7 @@ import androidx.room.Room
 import androidx.work.WorkManager
 import com.seank.vatroutbuddy.data.db.AppDatabase
 import com.seank.vatroutbuddy.data.db.StockingDao
+import com.seank.vatroutbuddy.data.db.NotificationSubscriptionDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -49,10 +50,9 @@ object AppModule {
         return database.stockingDao()
     }
 
-    @Singleton
     @Provides
-    fun provideWorkManager(@ApplicationContext context: Context): WorkManager {
-        return WorkManager.getInstance(context)
+    fun provideNotificationSubscriptionDao(database: AppDatabase): NotificationSubscriptionDao {
+        return database.notificationSubscriptionDao()
     }
 
     @Provides

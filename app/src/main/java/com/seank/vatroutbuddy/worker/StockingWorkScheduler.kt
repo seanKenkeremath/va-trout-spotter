@@ -1,5 +1,6 @@
 package com.seank.vatroutbuddy.worker
 
+import android.content.Context
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
@@ -8,14 +9,19 @@ import androidx.work.WorkManager
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.ExistingWorkPolicy
 import com.seank.vatroutbuddy.AppConfig
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class StockingWorkScheduler @Inject constructor(
-    private val workManager: WorkManager
+    @ApplicationContext private val appContext: Context
 ) {
+
+    private val workManager: WorkManager
+        get() = WorkManager.getInstance(appContext)
+
     fun schedulePeriodicWork() {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.UNMETERED) // Require WiFi

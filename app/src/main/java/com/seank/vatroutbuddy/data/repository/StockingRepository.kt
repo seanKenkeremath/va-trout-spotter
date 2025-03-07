@@ -162,6 +162,10 @@ class StockingRepository @Inject constructor(
         stockingDao.getAllCounties()
     }
 
+    suspend fun getAllWaterbodies(): List<String> = withContext(ioDispatcher) {
+        stockingDao.getAllWaterbodies()
+    }
+
     suspend fun getAllCategories(): List<String> = withContext(ioDispatcher) {
         stockingDao.getAllCategories()
     }

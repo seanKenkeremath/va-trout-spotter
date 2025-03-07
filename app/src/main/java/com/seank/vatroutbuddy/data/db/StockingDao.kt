@@ -82,6 +82,9 @@ interface StockingDao {
     @Query("SELECT DISTINCT county FROM stockings ORDER BY county")
     suspend fun getAllCounties(): List<String>
 
+    @Query("SELECT DISTINCT waterbody FROM stockings ORDER BY waterbody")
+    suspend fun getAllWaterbodies(): List<String>
+
     @Query("SELECT DISTINCT category FROM stockings ORDER BY category")
     suspend fun getAllCategories(): List<String>
 } 
