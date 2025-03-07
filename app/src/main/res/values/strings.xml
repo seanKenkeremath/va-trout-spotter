@@ -2,4 +2,18 @@
     <string name="app_name">VA Trout Buddy</string>
     <string name="title_stockings">Stockings</string>
     <string name="title_notifications">Notifications</string>
+    
+    <!-- Notifications Screen -->
+    <string name="notifications_county_section_title">County Notifications</string>
+    <string name="notifications_waterbody_section_title">Stocking Area Notifications</string>
+    <string name="notifications_edit_button">EDIT</string>
+    <string name="notifications_remove_button">Remove notification</string>
+    <string name="notifications_done_button">Done</string>
+    <string name="notifications_select_counties_title">Select Counties</string>
+    <string name="notifications_select_waterbodies_title">Select Location</string>
+    
+    <!-- Notifications Permission Screen -->
+    <string name="notifications_permission_title">Enable Notifications</string>
+    <string name="notifications_permission_description">Get notified when your favorite waters are stocked with trout</string>
+    <string name="notifications_permission_button">Open Settings</string>
 </resources>

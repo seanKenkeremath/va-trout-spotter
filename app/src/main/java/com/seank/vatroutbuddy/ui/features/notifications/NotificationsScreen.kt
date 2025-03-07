@@ -41,12 +41,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.seank.vatroutbuddy.R
 
 @Composable
 fun NotificationsScreen(
@@ -104,7 +106,7 @@ fun NotificationsScreen(
             // Counties Section
             item {
                 SectionHeader(
-                    title = "County Notifications",
+                    title = stringResource(R.string.notifications_county_section_title),
                     onEditClick = { showCountyPicker = true }
                 )
             }
@@ -121,7 +123,7 @@ fun NotificationsScreen(
             // Waterbodies Section
             item {
                 SectionHeader(
-                    title = "Waterbody Notifications",
+                    title = stringResource(R.string.notifications_waterbody_section_title),
                     onEditClick = { showWaterbodyPicker = true }
                 )
             }
@@ -137,7 +139,7 @@ fun NotificationsScreen(
         // County Picker Dialog
         if (showCountyPicker) {
             SubscriptionPickerDialog(
-                title = "Select Counties",
+                title = stringResource(R.string.notifications_select_counties_title),
                 options = uiState.counties.sorted(),
                 selectedOptions = uiState.subscribedCounties,
                 onDismiss = { showCountyPicker = false },
@@ -150,7 +152,7 @@ fun NotificationsScreen(
         // Waterbody Picker Dialog
         if (showWaterbodyPicker) {
             SubscriptionPickerDialog(
-                title = "Select Waterbodies",
+                title = stringResource(R.string.notifications_select_waterbodies_title),
                 options = uiState.waterbodies.sorted(),
                 selectedOptions = uiState.subscribedWaterbodies,
                 onDismiss = { showWaterbodyPicker = false },
@@ -180,7 +182,7 @@ private fun SectionHeader(
             style = MaterialTheme.typography.titleLarge
         )
         TextButton(onClick = onEditClick) {
-            Text("EDIT")
+            Text(stringResource(R.string.notifications_edit_button).uppercase())
         }
     }
 }
@@ -211,7 +213,7 @@ private fun SubscriptionItem(
             IconButton(onClick = onRemove) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Remove notification"
+                    contentDescription = stringResource(R.string.notifications_remove_button)
                 )
             }
         }
@@ -252,7 +254,7 @@ private fun SubscriptionPickerDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Done")
+                Text(stringResource(R.string.notifications_done_button))
             }
         }
     )
@@ -279,7 +281,7 @@ private fun NotificationsPermissionPrompt(
             )
             
             Text(
-                text = "Enable Notifications",
+                text = stringResource(R.string.notifications_permission_title),
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center
             )
@@ -287,7 +289,7 @@ private fun NotificationsPermissionPrompt(
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "Get notified when your favorite waters are stocked with trout",
+                text = stringResource(R.string.notifications_permission_description),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -298,7 +300,7 @@ private fun NotificationsPermissionPrompt(
             Button(
                 onClick = onOpenSettings
             ) {
-                Text("Open Settings")
+                Text(stringResource(R.string.notifications_permission_button))
             }
         }
     }
