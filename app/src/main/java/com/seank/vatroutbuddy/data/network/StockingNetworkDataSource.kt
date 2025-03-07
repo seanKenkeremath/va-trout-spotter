@@ -32,7 +32,7 @@ class StockingNetworkDataSource @Inject constructor() {
                 }
                 val url = "$STOCKING_URL?start_date=$encodedStartDate&end_date=$encodedEndDate"
 
-                val doc = Jsoup.connect(url).get()
+                val doc = Jsoup.connect(url).header("Accept-Language", "en").get()
                 StockingHtmlParser.parse(doc)
             }
         }
