@@ -4,6 +4,7 @@ import StockingFilters
 import com.seank.vatroutbuddy.data.repository.StockingRepository
 import com.seank.vatroutbuddy.domain.model.StockingInfo
 import com.seank.vatroutbuddy.domain.model.StockingsListPage
+import com.seank.vatroutbuddy.domain.usecase.FetchAndNotifyStockingsUseCase
 import com.seank.vatroutbuddy.util.TestFactory
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -29,6 +30,7 @@ class StockingsViewModelTest {
 
     private lateinit var viewModel: HomeViewModel
     private lateinit var repository: StockingRepository
+    private lateinit var fetchAndNotifyStockingsUseCase: FetchAndNotifyStockingsUseCase
     private val testDispatcher = StandardTestDispatcher()
     private val hasHistoricalDataFlow = MutableStateFlow(false)
 
@@ -36,6 +38,7 @@ class StockingsViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         repository = mockk(relaxed = true)
+        fetchAndNotifyStockingsUseCase = mockk(relaxed = true)
         coEvery { repository.hasHistoricalData } returns hasHistoricalDataFlow
     }
 
@@ -48,10 +51,10 @@ class StockingsViewModelTest {
     fun `initial load shows loading state and then success state`() = runTest {
         val mockStockings = createMockStockings(5)
         val mockPage = StockingsListPage(mockStockings, true)
-        coEvery { repository.fetchLatestStockings() } returns Result.success(mockStockings)
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(mockStockings)
         coEvery { repository.loadSavedStockings(pageSize = any(), stockingFilters = any()) } returns Result.success(mockPage)
 
-        viewModel = HomeViewModel(repository)
+        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
 
         // Initial state should be Loading
         assertTrue(viewModel.uiState.value is HomeUiState.Loading)
@@ -68,7 +71,7 @@ class StockingsViewModelTest {
     @Test
     fun `initial load error shows error state`() = runTest {
         val errorMessage = "Network error"
-        coEvery { repository.fetchLatestStockings() } returns Result.failure(Exception(errorMessage))
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.failure(Exception(errorMessage))
         coEvery {
             repository.loadSavedStockings(
                 pageSize = any(),
@@ -80,7 +83,7 @@ class StockingsViewModelTest {
             )
         )
 
-        viewModel = HomeViewModel(repository)
+        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
 
         // Initial state should be Loading
         assertTrue(viewModel.uiState.value is HomeUiState.Loading)
@@ -100,7 +103,7 @@ class StockingsViewModelTest {
         val mockPage = StockingsListPage(mockStockings, true)
 
         // Set up repository to delay returning results
-        coEvery { repository.fetchLatestStockings() } returns Result.success(mockStockings)
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(mockStockings)
         coEvery {
             repository.loadSavedStockings(
                 pageSize = any(),
@@ -108,7 +111,7 @@ class StockingsViewModelTest {
             )
         } returns Result.success(mockPage)
 
-        viewModel = HomeViewModel(repository)
+        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
 
         // isRefreshing should be true initially
         assertTrue(viewModel.isRefreshing.value)
@@ -127,7 +130,7 @@ class StockingsViewModelTest {
         val initialPage = StockingsListPage(initialStockings, true)
         val additionalPage = StockingsListPage(additionalStockings, true)
 
-        coEvery { repository.fetchLatestStockings() } returns Result.success(initialStockings)
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(initialStockings)
         coEvery {
             repository.loadSavedStockings(
                 pageSize = any(),
@@ -144,7 +147,7 @@ class StockingsViewModelTest {
             )
         } returns Result.success(additionalPage)
 
-        viewModel = HomeViewModel(repository)
+        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
         advanceUntilIdle()
 
         // Verify initial state
@@ -171,7 +174,7 @@ class StockingsViewModelTest {
         val initialPage = StockingsListPage(initialStockings, true)
         val errorMessage = "Failed to load more stockings"
 
-        coEvery { repository.fetchLatestStockings() } returns Result.success(initialStockings)
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(initialStockings)
         coEvery {
             repository.loadSavedStockings(
                 pageSize = any(),
@@ -188,7 +191,7 @@ class StockingsViewModelTest {
             )
         } returns Result.failure(Exception(errorMessage))
 
-        viewModel = HomeViewModel(repository)
+        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
         advanceUntilIdle()
 
         // Verify initial paging state
@@ -213,7 +216,7 @@ class StockingsViewModelTest {
         val emptyPage = StockingsListPage(emptyList(), false)
         val historicalStockings = createMockStockings(3, startId = 100)
 
-        coEvery { repository.fetchLatestStockings() } returns Result.success(initialStockings)
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(initialStockings)
         coEvery {
             repository.loadSavedStockings(
                 pageSize = any(),
@@ -232,7 +235,7 @@ class StockingsViewModelTest {
         coEvery { repository.fetchHistoricalData() } returns Result.success(historicalStockings)
         hasHistoricalDataFlow.value = false
 
-        viewModel = HomeViewModel(repository)
+        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
         advanceUntilIdle()
 
         // Verify initial paging state
@@ -260,7 +263,7 @@ class StockingsViewModelTest {
             val initialPage = StockingsListPage(initialStockings, true)
             val emptyPage = StockingsListPage(emptyList(), false)
 
-            coEvery { repository.fetchLatestStockings() } returns Result.success(initialStockings)
+            coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(initialStockings)
             coEvery {
                 repository.loadSavedStockings(
                     pageSize = any(),
@@ -278,7 +281,7 @@ class StockingsViewModelTest {
             } returns Result.success(emptyPage)
             hasHistoricalDataFlow.value = true
 
-            viewModel = HomeViewModel(repository)
+            viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
             advanceUntilIdle()
 
             // Verify initial paging state
@@ -302,7 +305,7 @@ class StockingsViewModelTest {
         val initialPage = StockingsListPage(initialStockings, true)
         val emptyPage = StockingsListPage(emptyList(), false)
 
-        coEvery { repository.fetchLatestStockings() } returns Result.success(initialStockings)
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(initialStockings)
         coEvery {
             repository.loadSavedStockings(
                 pageSize = any(),
@@ -321,7 +324,7 @@ class StockingsViewModelTest {
         hasHistoricalDataFlow.value = false
         coEvery { repository.fetchHistoricalData() } returns Result.failure(Exception("Failed to fetch historical data"))
 
-        viewModel = HomeViewModel(repository)
+        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
         advanceUntilIdle()
 
         // Verify initial paging state
@@ -346,7 +349,7 @@ class StockingsViewModelTest {
         val initialPage = StockingsListPage(initialStockings, true)
         val filteredPage = StockingsListPage(filteredStockings, false)
 
-        coEvery { repository.fetchLatestStockings() } returns Result.success(initialStockings)
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(initialStockings)
         coEvery { 
             repository.loadSavedStockings(
                 pageSize = any(),
@@ -362,7 +365,7 @@ class StockingsViewModelTest {
             )
         } returns Result.success(filteredPage)
 
-        viewModel = HomeViewModel(repository)
+        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
         advanceUntilIdle()
 
         // Verify initial state
@@ -389,7 +392,7 @@ class StockingsViewModelTest {
         val initialPage = StockingsListPage(initialStockings, true)
         val filteredPage = StockingsListPage(filteredStockings, false)
 
-        coEvery { repository.fetchLatestStockings() } returns Result.success(initialStockings)
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(initialStockings)
         coEvery { 
             repository.loadSavedStockings(
                 pageSize = any(),
@@ -405,7 +408,7 @@ class StockingsViewModelTest {
             )
         } returns Result.success(filteredPage)
 
-        viewModel = HomeViewModel(repository)
+        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
         advanceUntilIdle()
 
         // Apply filters
@@ -437,7 +440,7 @@ class StockingsViewModelTest {
 
         val filters = StockingFilters(counties = setOf("Filtered County"))
         
-        coEvery { repository.fetchLatestStockings() } returns Result.success(initialStockings)
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(initialStockings)
         coEvery { 
             repository.loadSavedStockings(
                 pageSize = any(),
@@ -455,7 +458,7 @@ class StockingsViewModelTest {
             )
         } returns Result.success(nextPage)
 
-        viewModel = HomeViewModel(repository)
+        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
         viewModel.updateFilters(filters)
         advanceUntilIdle()
 

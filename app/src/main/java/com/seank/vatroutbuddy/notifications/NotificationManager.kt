@@ -10,7 +10,7 @@ import javax.inject.Singleton
 
 @Singleton
 class NotificationManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext val context: Context
 ) {
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 

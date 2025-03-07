@@ -6,7 +6,7 @@ import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import androidx.work.testing.TestListenableWorkerBuilder
-import com.seank.vatroutbuddy.data.repository.StockingRepository
+import com.seank.vatroutbuddy.domain.usecase.FetchAndNotifyStockingsUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -20,33 +20,33 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class StockingUpdateWorkerTest {
     private lateinit var context: Context
-    private lateinit var repository: StockingRepository
+    private lateinit var fetchAndNotifyStockingsUseCase: FetchAndNotifyStockingsUseCase
 
     @Before
     fun setup() {
         context = ApplicationProvider.getApplicationContext()
-        repository = mockk()
+        fetchAndNotifyStockingsUseCase = mockk()
     }
 
     @Test
-    fun `worker succeeds when refresh succeeds`() = runTest {
-        coEvery { repository.fetchLatestStockings() } returns Result.success(mockk())
+    fun `worker succeeds when use case succeeds`() = runTest {
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(mockk())
         
         val worker = TestListenableWorkerBuilder<StockingUpdateWorker>(context)
-            .setWorkerFactory(TestWorkerFactory(repository))
+            .setWorkerFactory(TestWorkerFactory(fetchAndNotifyStockingsUseCase))
             .build()
         val result = worker.doWork()
         
-        coVerify { repository.fetchLatestStockings() }
+        coVerify { fetchAndNotifyStockingsUseCase.execute() }
         assertEquals(ListenableWorker.Result.success(), result)
     }
 
     @Test
-    fun `worker returns retry when refresh fails`() = runTest {
-        coEvery { repository.fetchLatestStockings() } returns Result.failure(Exception("Test error"))
+    fun `worker returns retry when use case fails`() = runTest {
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.failure(Exception("Test error"))
         
         val worker = TestListenableWorkerBuilder<StockingUpdateWorker>(context)
-            .setWorkerFactory(TestWorkerFactory(repository))
+            .setWorkerFactory(TestWorkerFactory(fetchAndNotifyStockingsUseCase))
             .build()
         val result = worker.doWork()
         
@@ -54,7 +54,7 @@ class StockingUpdateWorkerTest {
     }
 }
 
-class TestWorkerFactory(private val repository: StockingRepository) : WorkerFactory() {
+class TestWorkerFactory(private val fetchAndNotifyStockingsUseCase: FetchAndNotifyStockingsUseCase) : WorkerFactory() {
     override fun createWorker(
         appContext: Context,
         workerClassName: String,
@@ -62,7 +62,7 @@ class TestWorkerFactory(private val repository: StockingRepository) : WorkerFact
     ): ListenableWorker? {
         return when (workerClassName) {
             StockingUpdateWorker::class.java.name ->
-                StockingUpdateWorker(appContext, workerParameters, repository)
+                StockingUpdateWorker(appContext, workerParameters, fetchAndNotifyStockingsUseCase)
             else -> null
         }
     }

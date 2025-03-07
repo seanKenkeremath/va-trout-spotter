@@ -13,10 +13,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.TreeSet
 import javax.inject.Inject
+import com.seank.vatroutbuddy.domain.usecase.FetchAndNotifyStockingsUseCase
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val stockingRepository: StockingRepository
+    private val stockingRepository: StockingRepository,
+    private val fetchAndNotifyStockingsUseCase: FetchAndNotifyStockingsUseCase
 ) : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing = _isRefreshing.asStateFlow()
@@ -46,7 +48,7 @@ class HomeViewModel @Inject constructor(
             _uiState.value = HomeUiState.Loading
         }
         viewModelScope.launch {
-            val result = stockingRepository.fetchLatestStockings()
+            val result = fetchAndNotifyStockingsUseCase.execute()
             _isRefreshing.value = false
             val stockings = result.getOrNull()
             if (stockings == null) {

@@ -16,4 +16,8 @@
     <string name="notifications_permission_title">Enable Notifications</string>
     <string name="notifications_permission_description">Get notified when your favorite waters are stocked with trout</string>
     <string name="notifications_permission_button">Open Settings</string>
+
+    <!-- Stocking Notifications -->
+    <string name="notification_stocking_title">New Stocking Alert!</string>
+    <string name="notification_stocking_content">%1$s has been stocked!</string>
 </resources>
