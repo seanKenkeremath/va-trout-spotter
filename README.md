@@ -29,4 +29,5 @@ One of the reasons I created this app, other than my own trout fishing aspiratio
  - Notifications (subscribing and sending local notifications from WorkManager)
  - Settings screen (About, data management)
  - Sanitize locations from web scraping
+ - Nightly integration tests of web scraping
  - Locations tab with directions and more details (future work)
