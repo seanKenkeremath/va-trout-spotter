@@ -38,7 +38,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         fetchLatestStockings()
-        loadCachedStockings()
+        tryToLoadSavedStockings()
         loadFilterOptions()
     }
 
@@ -60,6 +60,15 @@ class HomeViewModel @Inject constructor(
             _uiState.value = HomeUiState.Success(
                 stockings = allStockings.toList()
             )
+        }
+    }
+
+    private fun tryToLoadSavedStockings() {
+        viewModelScope.launch {
+            val hasInitialData = stockingRepository.hasInitialData.first()
+            if (hasInitialData) {
+                loadCachedStockings()
+            }
         }
     }
 

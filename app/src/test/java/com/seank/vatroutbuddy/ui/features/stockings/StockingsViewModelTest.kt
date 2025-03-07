@@ -32,6 +32,7 @@ class StockingsViewModelTest {
     private lateinit var repository: StockingRepository
     private lateinit var fetchAndNotifyStockingsUseCase: FetchAndNotifyStockingsUseCase
     private val testDispatcher = StandardTestDispatcher()
+    private val hasInitialDataFlow = MutableStateFlow(false)
     private val hasHistoricalDataFlow = MutableStateFlow(false)
 
     @Before
@@ -40,6 +41,7 @@ class StockingsViewModelTest {
         repository = mockk(relaxed = true)
         fetchAndNotifyStockingsUseCase = mockk(relaxed = true)
         coEvery { repository.hasHistoricalData } returns hasHistoricalDataFlow
+        coEvery { repository.hasInitialData } returns hasInitialDataFlow
     }
 
     @After

@@ -15,6 +15,16 @@ class AppPreferences @Inject constructor(
     private val dataStore: DataStore<Preferences>,
 ) {
 
+    val hasDownloadedInitialData: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[INITIAL_DATA_DOWNLOADED] ?: false
+    }
+
+    suspend fun setInitialDataDownloaded(downloaded: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[INITIAL_DATA_DOWNLOADED] = downloaded
+        }
+    }
+
     val hasDownloadedHistoricalData: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[HISTORICAL_DATA_DOWNLOADED] ?: false
     }
@@ -27,5 +37,6 @@ class AppPreferences @Inject constructor(
 
     companion object {
         private val HISTORICAL_DATA_DOWNLOADED = booleanPreferencesKey("historical_data_downloaded")
+        private val INITIAL_DATA_DOWNLOADED = booleanPreferencesKey("initial_data_downloaded")
     }
 } 

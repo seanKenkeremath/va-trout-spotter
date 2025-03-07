@@ -24,6 +24,7 @@ class StockingRepository @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
 
+    val hasInitialData = preferences.hasDownloadedInitialData
     val hasHistoricalData = preferences.hasDownloadedHistoricalData
 
     // Load stocking data from the network and store it in the database
@@ -56,7 +57,11 @@ class StockingRepository @Inject constructor(
         } else {
             LocalDate.now().minusMonths(AppConfig.DEFAULT_MONTHS_PAST)
         }
-        fetchStockingsInDateRange(startDate)
+        val result = fetchStockingsInDateRange(startDate)
+        if (result.isSuccess) {
+            preferences.setInitialDataDownloaded(true)
+        }
+        result
     }
 
     suspend fun loadSavedStockings(
