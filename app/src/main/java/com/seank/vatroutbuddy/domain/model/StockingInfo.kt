@@ -12,5 +12,8 @@ data class StockingInfo(
     val waterbody: String,
     val category: String,
     val species: List<String>,
-    val isNationalForest: Boolean
+    val isNationalForest: Boolean,
+    val isNsf: Boolean,
+    val isHeritageDayWater: Boolean,
+    val isDelayedHarvest: Boolean
 ) : Parcelable

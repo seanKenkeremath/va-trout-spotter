@@ -3,6 +3,7 @@ package com.seank.vatroutbuddy.ui.features.detail
 import androidx.lifecycle.SavedStateHandle
 import com.seank.vatroutbuddy.data.repository.StockingRepository
 import com.seank.vatroutbuddy.domain.model.StockingInfo
+import com.seank.vatroutbuddy.util.TestFactory
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -132,7 +133,7 @@ class StockingDetailViewModelTest {
     }
     
     private fun createMockStocking(id: Long, waterbody: String = "Lake Test"): StockingInfo {
-        return StockingInfo(
+        return TestFactory.createStockingInfo(
             id = id,
             date = LocalDate.now().minusDays(id % 10),
             waterbody = waterbody,

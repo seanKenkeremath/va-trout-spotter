@@ -3,6 +3,7 @@ package com.seank.vatroutbuddy.ui.features.home
 import com.seank.vatroutbuddy.data.repository.StockingRepository
 import com.seank.vatroutbuddy.domain.model.StockingInfo
 import com.seank.vatroutbuddy.domain.model.StockingsListPage
+import com.seank.vatroutbuddy.util.TestFactory
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -269,7 +270,7 @@ class StockingsViewModelTest {
 
     private fun createMockStockings(count: Int, startId: Int = 1): List<StockingInfo> {
         return (startId until startId + count).map { id ->
-            StockingInfo(
+            TestFactory.createStockingInfo(
                 id = id.toLong(),
                 date = LocalDate.now().minusDays(id.toLong()),
                 waterbody = "Lake $id",

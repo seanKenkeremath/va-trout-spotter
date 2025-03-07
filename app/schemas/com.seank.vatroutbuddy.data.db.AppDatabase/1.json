@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "da5fc4352dd83f7c5f5807a1df2bdc82",
+    "identityHash": "f1c715dc5af511fc57b7aaf6d7715cbd",
     "entities": [
       {
         "tableName": "stockings",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `county` TEXT NOT NULL, `waterbody` TEXT NOT NULL, `category` TEXT NOT NULL, `species` TEXT NOT NULL, `isNationalForest` INTEGER NOT NULL, `lastUpdated` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `county` TEXT NOT NULL, `waterbody` TEXT NOT NULL, `category` TEXT NOT NULL, `species` TEXT NOT NULL, `isNationalForest` INTEGER NOT NULL, `isNsf` INTEGER NOT NULL, `isHeritageDayWater` INTEGER NOT NULL, `isDelayedHarvest` INTEGER NOT NULL, `lastUpdated` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -47,6 +47,24 @@
           {
             "fieldPath": "isNationalForest",
             "columnName": "isNationalForest",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isNsf",
+            "columnName": "isNsf",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isHeritageDayWater",
+            "columnName": "isHeritageDayWater",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDelayedHarvest",
+            "columnName": "isDelayedHarvest",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -92,7 +110,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'da5fc4352dd83f7c5f5807a1df2bdc82')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f1c715dc5af511fc57b7aaf6d7715cbd')"
     ]
   }
 }

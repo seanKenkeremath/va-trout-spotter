@@ -126,7 +126,10 @@ class StockingDaoTest {
         county: String = "Test County",
         category: String = "Category A",
         species: List<String> = listOf("Rainbow"),
-        isNationalForest: Boolean = false
+        isNationalForest: Boolean = false,
+        isNsf: Boolean = false,
+        isHeritageDayWater: Boolean = false,
+        isDelayedHarvest: Boolean = false,
     ) = StockingEntity(
         id = id.toLong(),
         date = date,
@@ -135,6 +138,9 @@ class StockingDaoTest {
         category = category,
         species = species,
         isNationalForest = isNationalForest,
+        isNsf = isNsf,
+        isHeritageDayWater = isHeritageDayWater,
+        isDelayedHarvest = isDelayedHarvest,
         lastUpdated = LocalDateTime.now()
     )
 }

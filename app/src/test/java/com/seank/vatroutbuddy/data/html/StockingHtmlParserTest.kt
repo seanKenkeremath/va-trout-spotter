@@ -122,4 +122,86 @@ class StockingHtmlParserTest {
 
         assertEquals(0, result.size)
     }
+
+    @Test
+    fun `parse correctly handles multiple tags in waterbody name`() {
+        val html = """
+            <table>
+                <tr><th>Date</th><th>County</th><th>Waterbody</th><th>Category</th><th>Species Stocked</th></tr>
+                <tr>
+                    <td>February 21, 2025</td>
+                    <td>Bath County</td>
+                    <td>South River [Delayed Harvest Water] [NSF] [Heritage Day Water]</td>
+                    <td><a href="#">A</a></td>
+                    <td><ul><li>Rainbow Trout</li></ul></td>
+                </tr>
+            </table>
+        """.trimIndent()
+
+        val doc = Jsoup.parse(html)
+        val result = StockingHtmlParser.parse(doc)
+
+        assertEquals(1, result.size)
+        with(result[0]) {
+            assertEquals("South River", waterbody)
+            assertEquals(true, isDelayedHarvest)
+            assertEquals(true, isNsf)
+            assertEquals(true, isHeritageDayWater)
+            assertEquals(false, isNationalForest)
+        }
+    }
+
+    @Test
+    fun `parse correctly handles whitespace in tags`() {
+        val html = """
+            <table>
+                <tr><th>Date</th><th>County</th><th>Waterbody</th><th>Category</th><th>Species Stocked</th></tr>
+                <tr>
+                    <td>February 21, 2025</td>
+                    <td>Bath County</td>
+                    <td>Lake Test  [NSF]  [Heritage Day Water]   </td>
+                    <td><a href="#">A</a></td>
+                    <td><ul><li>Rainbow Trout</li></ul></td>
+                </tr>
+            </table>
+        """.trimIndent()
+
+        val doc = Jsoup.parse(html)
+        val result = StockingHtmlParser.parse(doc)
+
+        assertEquals(1, result.size)
+        with(result[0]) {
+            assertEquals("Lake Test", waterbody)
+            assertEquals(true, isNsf)
+            assertEquals(true, isHeritageDayWater)
+            assertEquals(false, isDelayedHarvest)
+            assertEquals(false, isNationalForest)
+        }
+    }
+
+    @Test
+    fun `parse correctly handles case insensitive tags`() {
+        val html = """
+            <table>
+                <tr><th>Date</th><th>County</th><th>Waterbody</th><th>Category</th><th>Species Stocked</th></tr>
+                <tr>
+                    <td>February 21, 2025</td>
+                    <td>Bath County</td>
+                    <td>Lake Test [nsf] [HERITAGE DAY WATER]</td>
+                    <td><a href="#">A</a></td>
+                    <td><ul><li>Rainbow Trout</li></ul></td>
+                </tr>
+            </table>
+        """.trimIndent()
+
+        val doc = Jsoup.parse(html)
+        val result = StockingHtmlParser.parse(doc)
+
+        assertEquals(1, result.size)
+        with(result[0]) {
+            assertEquals("Lake Test", waterbody)
+            assertEquals(true, isNsf)
+            assertEquals(true, isHeritageDayWater)
+        }
+    }
 } 

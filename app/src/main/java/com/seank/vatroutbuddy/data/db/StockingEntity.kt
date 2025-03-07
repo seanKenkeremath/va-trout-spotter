@@ -29,6 +29,9 @@ data class StockingEntity(
     val category: String,
     val species: List<String>,
     val isNationalForest: Boolean,
+    val isNsf: Boolean,
+    val isHeritageDayWater: Boolean,
+    val isDelayedHarvest: Boolean,
     val lastUpdated: LocalDateTime
 ) {
     fun toStockingInfo() = StockingInfo(
@@ -38,7 +41,10 @@ data class StockingEntity(
         waterbody = waterbody,
         category = category,
         species = species,
-        isNationalForest = isNationalForest
+        isNationalForest = isNationalForest,
+        isNsf = isNsf,
+        isHeritageDayWater = isHeritageDayWater,
+        isDelayedHarvest = isDelayedHarvest
     )
 
     companion object {
@@ -52,6 +58,9 @@ data class StockingEntity(
             category = info.category,
             species = info.species,
             isNationalForest = info.isNationalForest,
+            isNsf = info.isNsf,
+            isHeritageDayWater = info.isHeritageDayWater,
+            isDelayedHarvest = info.isDelayedHarvest,
             lastUpdated = lastUpdated
         )
     }

@@ -14,7 +14,7 @@ import com.seank.vatroutbuddy.data.db.StockingDao
 import com.seank.vatroutbuddy.data.db.StockingEntity
 import com.seank.vatroutbuddy.data.network.StockingNetworkDataSource
 import com.seank.vatroutbuddy.data.preferences.AppPreferences
-import com.seank.vatroutbuddy.domain.model.StockingInfo
+import com.seank.vatroutbuddy.util.TestFactory
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -78,7 +78,10 @@ class StockingRepositoryTest {
                     category = "A",
                     species = listOf("Rainbow Trout"),
                     isNationalForest = false,
-                    lastUpdated = today.minusDays(i / 2).atStartOfDay()
+                    lastUpdated = today.minusDays(i / 2).atStartOfDay(),
+                    isNsf = false,
+                    isHeritageDayWater = false,
+                    isDelayedHarvest = false,
                 )
             )
         }
@@ -138,14 +141,10 @@ class StockingRepositoryTest {
 
         coEvery { networkDataSource.fetchStockings(startDate) } returns Result.success(
             listOf(
-                StockingInfo(
-                    id = -1,
+                TestFactory.createStockingInfo(
+                    id = 1,
                     date = LocalDate.now(),
-                    county = "Test County",
-                    waterbody = "New Waterbody",
-                    category = "A",
-                    species = listOf("Rainbow Trout"),
-                    isNationalForest = false
+                    waterbody = "New Waterbody"
                 )
             )
         )
@@ -163,14 +162,10 @@ class StockingRepositoryTest {
         val earliestDate = stockingDao.getEarliestStockingDate()
         val expectedStartDate = LocalDate.of(2018, Month.OCTOBER, 1)
         val stockings = listOf(
-            StockingInfo(
-                id = -1,
+            TestFactory.createStockingInfo(
+                id = 1,
                 date = LocalDate.of(2018, 10, 2),
-                county = "Test County",
-                waterbody = "Historical Waterbody",
-                category = "A",
-                species = listOf("Rainbow Trout"),
-                isNationalForest = false
+                waterbody = "Historical Waterbody"
             )
         )
 
@@ -204,14 +199,10 @@ class StockingRepositoryTest {
         val today = LocalDate.now()
         val expectedStartDate = LocalDate.of(2018, Month.OCTOBER, 1)
         val stockings = listOf(
-            StockingInfo(
+            TestFactory.createStockingInfo(
                 id = 1,
                 date = today,
-                county = "Test County",
-                waterbody = "Historical Waterbody",
-                category = "A",
-                species = listOf("Rainbow Trout"),
-                isNationalForest = false
+                waterbody = "Historical Waterbody"
             )
         )
 
