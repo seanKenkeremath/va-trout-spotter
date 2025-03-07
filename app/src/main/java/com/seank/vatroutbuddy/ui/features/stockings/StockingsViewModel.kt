@@ -16,7 +16,7 @@ import javax.inject.Inject
 import com.seank.vatroutbuddy.domain.usecase.FetchAndNotifyStockingsUseCase
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class StockingsViewModel @Inject constructor(
     private val stockingRepository: StockingRepository,
     private val fetchAndNotifyStockingsUseCase: FetchAndNotifyStockingsUseCase
 ) : ViewModel() {
@@ -67,12 +67,12 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             val hasInitialData = stockingRepository.hasInitialData.first()
             if (hasInitialData) {
-                loadCachedStockings()
+                loadSavedStockings()
             }
         }
     }
 
-    private fun loadCachedStockings() {
+    private fun loadSavedStockings() {
         viewModelScope.launch {
             val filters = _filters.value
             val loadResult = stockingRepository.loadSavedStockings(
@@ -164,7 +164,7 @@ class HomeViewModel @Inject constructor(
         allStockings.clear()
         _uiState.value = HomeUiState.Loading
         _pagingState.value = PagingState.Idle
-        loadCachedStockings()
+        loadSavedStockings()
     }
 
     fun clearFilters() {

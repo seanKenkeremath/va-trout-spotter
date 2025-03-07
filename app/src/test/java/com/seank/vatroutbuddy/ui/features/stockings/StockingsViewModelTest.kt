@@ -28,7 +28,7 @@ import java.time.LocalDate
 @ExperimentalCoroutinesApi
 class StockingsViewModelTest {
 
-    private lateinit var viewModel: HomeViewModel
+    private lateinit var viewModel: StockingsViewModel
     private lateinit var repository: StockingRepository
     private lateinit var fetchAndNotifyStockingsUseCase: FetchAndNotifyStockingsUseCase
     private val testDispatcher = StandardTestDispatcher()
@@ -56,7 +56,7 @@ class StockingsViewModelTest {
         coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(mockStockings)
         coEvery { repository.loadSavedStockings(pageSize = any(), stockingFilters = any()) } returns Result.success(mockPage)
 
-        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
+        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
 
         // Initial state should be Loading
         assertTrue(viewModel.uiState.value is HomeUiState.Loading)
@@ -85,7 +85,7 @@ class StockingsViewModelTest {
             )
         )
 
-        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
+        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
 
         // Initial state should be Loading
         assertTrue(viewModel.uiState.value is HomeUiState.Loading)
@@ -113,7 +113,7 @@ class StockingsViewModelTest {
             )
         } returns Result.success(mockPage)
 
-        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
+        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
 
         // isRefreshing should be true initially
         assertTrue(viewModel.isRefreshing.value)
@@ -149,7 +149,7 @@ class StockingsViewModelTest {
             )
         } returns Result.success(additionalPage)
 
-        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
+        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
         advanceUntilIdle()
 
         // Verify initial state
@@ -193,7 +193,7 @@ class StockingsViewModelTest {
             )
         } returns Result.failure(Exception(errorMessage))
 
-        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
+        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
         advanceUntilIdle()
 
         // Verify initial paging state
@@ -237,7 +237,7 @@ class StockingsViewModelTest {
         coEvery { repository.fetchHistoricalData() } returns Result.success(historicalStockings)
         hasHistoricalDataFlow.value = false
 
-        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
+        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
         advanceUntilIdle()
 
         // Verify initial paging state
@@ -283,7 +283,7 @@ class StockingsViewModelTest {
             } returns Result.success(emptyPage)
             hasHistoricalDataFlow.value = true
 
-            viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
+            viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
             advanceUntilIdle()
 
             // Verify initial paging state
@@ -326,7 +326,7 @@ class StockingsViewModelTest {
         hasHistoricalDataFlow.value = false
         coEvery { repository.fetchHistoricalData() } returns Result.failure(Exception("Failed to fetch historical data"))
 
-        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
+        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
         advanceUntilIdle()
 
         // Verify initial paging state
@@ -367,7 +367,7 @@ class StockingsViewModelTest {
             )
         } returns Result.success(filteredPage)
 
-        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
+        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
         advanceUntilIdle()
 
         // Verify initial state
@@ -410,7 +410,7 @@ class StockingsViewModelTest {
             )
         } returns Result.success(filteredPage)
 
-        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
+        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
         advanceUntilIdle()
 
         // Apply filters
@@ -460,7 +460,7 @@ class StockingsViewModelTest {
             )
         } returns Result.success(nextPage)
 
-        viewModel = HomeViewModel(repository, fetchAndNotifyStockingsUseCase)
+        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
         viewModel.updateFilters(filters)
         advanceUntilIdle()
 

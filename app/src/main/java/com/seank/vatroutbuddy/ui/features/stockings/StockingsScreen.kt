@@ -39,7 +39,7 @@ import java.time.format.DateTimeFormatter
 fun HomeScreen(
     onStockingClick: (StockingInfo) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: StockingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pagingState by viewModel.pagingState.collectAsState()
