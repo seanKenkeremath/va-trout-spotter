@@ -9,6 +9,8 @@ import androidx.work.WorkManager
 import com.seank.vatroutbuddy.data.db.AppDatabase
 import com.seank.vatroutbuddy.data.db.StockingDao
 import com.seank.vatroutbuddy.data.db.NotificationSubscriptionDao
+import com.seank.vatroutbuddy.permissions.AndroidPermissionsManager
+import com.seank.vatroutbuddy.permissions.PermissionsManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -74,4 +76,10 @@ object AppModule {
     @Provides
     @MainDispatcher
     fun provideMainDispatcher() : CoroutineDispatcher = Dispatchers.Main
+
+    @Provides
+    @Singleton
+    fun providePermissionsManager(
+        @ApplicationContext context: Context
+    ): PermissionsManager = AndroidPermissionsManager(context)
 } 
