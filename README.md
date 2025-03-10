@@ -26,7 +26,6 @@ One of the reasons I created this app, other than my own trout fishing aspiratio
  - Improve filter flow
  - Logo, loading animation
  - Empty state
- - Notifications (subscribing and sending local notifications from WorkManager)
  - Settings screen (About, data management)
  - Sanitize locations from web scraping
  - Nightly integration tests of web scraping
