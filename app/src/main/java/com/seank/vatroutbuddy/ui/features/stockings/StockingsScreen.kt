@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.seank.vatroutbuddy.AppConfig
 import com.seank.vatroutbuddy.domain.model.StockingInfo
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -63,8 +64,9 @@ fun StockingsScreen(
                 val layoutInfo = listState.layoutInfo
                 val totalItemsCount = layoutInfo.totalItemsCount
                 val lastVisibleItemIndex = (layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0)
-                
-                val shouldPaginate = lastVisibleItemIndex >= (totalItemsCount - 6)
+
+                val shouldPaginate =
+                    lastVisibleItemIndex >= (totalItemsCount - AppConfig.PRELOAD_PAGE_OFFSET)
                 shouldPaginate
             } else {
                 false

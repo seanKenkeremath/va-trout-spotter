@@ -12,6 +12,7 @@ object AppConfig {
 
     // Pagination
     const val DEFAULT_PAGE_SIZE = 30
+    const val PRELOAD_PAGE_OFFSET = 6
 
     // Periodic background fetch config
     const val BACKGROUND_FETCH_FREQUENCY_HOURS = 12L
