@@ -87,26 +87,30 @@ fun AppNavHost() {
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(NavigationRoutes.Stockings.route) {
-                StockingsScreen(
-                    onUpdateAppBar = { actions ->
-                        appBarActions = actions
-                    },
-                    onStockingClick = { stocking ->
-                        navController.currentBackStackEntry?.savedStateHandle?.set(
-                            "stocking",
-                            stocking
-                        )
-                        navController.navigate(NavigationRoutes.StockingDetail.route)
-                    }
-                )
+                Surface {
+                    StockingsScreen(
+                        onUpdateAppBar = { actions ->
+                            appBarActions = actions
+                        },
+                        onStockingClick = { stocking ->
+                            navController.currentBackStackEntry?.savedStateHandle?.set(
+                                "stocking",
+                                stocking
+                            )
+                            navController.navigate(NavigationRoutes.StockingDetail.route)
+                        }
+                    )
+                }
             }
 
             composable(NavigationRoutes.Notifications.route) {
-                NotificationsScreen(
-                    onUpdateAppBar = { actions ->
-                        appBarActions = actions
-                    }
-                )
+                Surface {
+                    NotificationsScreen(
+                        onUpdateAppBar = { actions ->
+                            appBarActions = actions
+                        }
+                    )
+                }
             }
 
             dialog(
