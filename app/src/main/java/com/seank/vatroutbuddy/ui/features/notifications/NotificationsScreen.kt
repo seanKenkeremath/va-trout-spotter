@@ -52,6 +52,7 @@ import com.seank.vatroutbuddy.R
 
 @Composable
 fun NotificationsScreen(
+    onUpdateAppBar: (List<@Composable () -> Unit>) -> Unit,
     viewModel: NotificationsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -59,6 +60,10 @@ fun NotificationsScreen(
     var showCountyPicker by remember { mutableStateOf(false) }
     var showWaterbodyPicker by remember { mutableStateOf(false) }
     var hasRequestedPermission by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        onUpdateAppBar(emptyList())
+    }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()

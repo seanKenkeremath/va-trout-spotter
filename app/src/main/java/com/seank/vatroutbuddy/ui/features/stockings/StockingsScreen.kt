@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -37,6 +39,7 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun HomeScreen(
+    onUpdateAppBar: (List<@Composable () -> Unit>) -> Unit,
     onStockingClick: (StockingInfo) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: StockingsViewModel = hiltViewModel()
@@ -47,6 +50,30 @@ fun HomeScreen(
     val availableCounties by viewModel.availableCounties.collectAsState()
     var showFilters by remember { mutableStateOf(false) }
     val listState = remember { LazyListState() }
+
+    LaunchedEffect(Unit) {
+        onUpdateAppBar(
+            listOf {
+                BadgedBox(
+                    badge = {
+                        if (filters.activeFilterCount > 0) {
+                            // TODO: centralize padding/use adaptive dimens
+                            // This should be half of padding
+                            Badge(modifier = Modifier.offset(x = (-8).dp, y = 8.dp)) {
+                                Text(
+                                    filters.activeFilterCount.toString()
+                                )
+                            }
+                        }
+                    },
+                ) {
+                    IconButton(onClick = { showFilters = true }) {
+                        Icon(Icons.Default.Info, contentDescription = "Filters")
+                    }
+                }
+            }
+        )
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         when (val state = uiState) {
@@ -119,22 +146,6 @@ fun HomeScreen(
                         viewModel.loadMoreStockings()
                     }
                 }
-        }
-
-        // Add filter FAB
-        BadgedBox(
-            badge = {
-                if (filters.activeFilterCount > 0) {
-                    Badge { Text(filters.activeFilterCount.toString()) }
-                }
-            },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp)
-        ) {
-            IconButton(onClick = { showFilters = true }) {
-                Icon(Icons.Default.Info, contentDescription = "Filters")
-            }
         }
 
         // Filter bottom sheet

@@ -48,12 +48,12 @@ fun AppNavHost() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    // Remember the current main route across configuration changes
     var currentMainRoute by rememberSaveable {
         mutableStateOf(NavigationRoutes.Stockings.route)
     }
 
-    // Update the main route synchronously when the back stack changes
+    var appBarActions by remember { mutableStateOf<List<@Composable () -> Unit>>(emptyList()) }
+
     val currentRoute = navBackStackEntry?.destination?.route
     if (currentRoute != null && BottomNavItem.entries.find { it.route == currentRoute } != null) {
         currentMainRoute = currentRoute
@@ -70,6 +70,7 @@ fun AppNavHost() {
                     }
                     Text(stringResource(titleResId))
                 },
+                actions = { appBarActions.forEach { it() } }
             )
         },
         bottomBar = { BottomNavigationBar(navController) }
@@ -87,6 +88,9 @@ fun AppNavHost() {
         ) {
             composable(NavigationRoutes.Stockings.route) {
                 HomeScreen(
+                    onUpdateAppBar = { actions ->
+                        appBarActions = actions
+                    },
                     onStockingClick = { stocking ->
                         navController.currentBackStackEntry?.savedStateHandle?.set(
                             "stocking",
@@ -98,7 +102,11 @@ fun AppNavHost() {
             }
 
             composable(NavigationRoutes.Notifications.route) {
-                NotificationsScreen()
+                NotificationsScreen(
+                    onUpdateAppBar = { actions ->
+                        appBarActions = actions
+                    }
+                )
             }
 
             dialog(
