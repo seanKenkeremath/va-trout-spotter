@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Badge
@@ -26,7 +26,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -48,7 +55,22 @@ fun StockingsScreen(
     val filters by viewModel.filters.collectAsState()
     val availableCounties by viewModel.availableCounties.collectAsState()
     var showFilters by remember { mutableStateOf(false) }
-    val listState = remember { LazyListState() }
+    val listState = rememberLazyListState()
+
+    val shouldStartPaginate by remember {
+        derivedStateOf {
+            if (pagingState is PagingState.Idle) {
+                val layoutInfo = listState.layoutInfo
+                val totalItemsCount = layoutInfo.totalItemsCount
+                val lastVisibleItemIndex = (layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0)
+                
+                val shouldPaginate = lastVisibleItemIndex >= (totalItemsCount - 6)
+                shouldPaginate
+            } else {
+                false
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         onUpdateAppBar(
@@ -137,14 +159,10 @@ fun StockingsScreen(
             }
         }
 
-        // Trigger pagination when scrolled to the end
-        LaunchedEffect(listState) {
-            snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == listState.layoutInfo.totalItemsCount - 1 }
-                .collect { isAtEnd ->
-                    if (isAtEnd) {
-                        viewModel.loadMoreStockings()
-                    }
-                }
+        LaunchedEffect(shouldStartPaginate) {
+            if (shouldStartPaginate) {
+                viewModel.loadMoreStockings()
+            }
         }
 
         // Filter bottom sheet
