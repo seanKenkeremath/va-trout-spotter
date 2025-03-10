@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,18 +47,28 @@ import kotlinx.coroutines.delay
 fun AppNavHost() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route.orEmpty()
+
+    // Remember the current main route across configuration changes
+    var currentMainRoute by rememberSaveable {
+        mutableStateOf(NavigationRoutes.Stockings.route)
+    }
+
+    // Update the main route synchronously when the back stack changes
+    val currentRoute = navBackStackEntry?.destination?.route
+    if (currentRoute != null && BottomNavItem.entries.find { it.route == currentRoute } != null) {
+        currentMainRoute = currentRoute
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    val textResId = when (currentRoute) {
+                    val titleResId = when (currentMainRoute) {
                         NavigationRoutes.Stockings.route -> R.string.title_stockings
                         NavigationRoutes.Notifications.route -> R.string.title_notifications
                         else -> R.string.app_name
                     }
-                    Text(stringResource(textResId))
+                    Text(stringResource(titleResId))
                 },
             )
         },
