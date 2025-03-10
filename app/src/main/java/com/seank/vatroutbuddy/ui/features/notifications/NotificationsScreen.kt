@@ -24,6 +24,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -78,7 +79,7 @@ fun NotificationsScreen(
 
     // Check permissions when screen is first displayed
     LaunchedEffect(Unit) {
-        if (!hasRequestedPermission && !uiState.hasNotificationPermission) {
+        if (!hasRequestedPermission && uiState is NotificationsUiState.NoPermissions) {
             hasRequestedPermission = true
             viewModel.requestNotificationPermission(permissionLauncher)
         }
@@ -94,77 +95,89 @@ fun NotificationsScreen(
         }
     }
 
-    if (!uiState.hasNotificationPermission) {
-        NotificationsPermissionPrompt(
-            onOpenSettings = {
-                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                }
-                context.startActivity(intent)
-            },
-        )
-    } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp)
-        ) {
-            // Counties Section
-            item {
-                SectionHeader(
-                    title = stringResource(R.string.notifications_county_section_title),
-                    onEditClick = { showCountyPicker = true }
-                )
-            }
-
-            items(uiState.subscribedCounties.toList().sorted()) { county ->
-                SubscriptionItem(
-                    text = county,
-                    onRemove = { viewModel.toggleCountySubscription(county, false) }
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            // Waterbodies Section
-            item {
-                SectionHeader(
-                    title = stringResource(R.string.notifications_waterbody_section_title),
-                    onEditClick = { showWaterbodyPicker = true }
-                )
-            }
-
-            items(uiState.subscribedWaterbodies.toList().sorted()) { waterbody ->
-                SubscriptionItem(
-                    text = waterbody,
-                    onRemove = { viewModel.toggleWaterbodySubscription(waterbody, false) }
-                )
+    val state = uiState
+    when (state) {
+        NotificationsUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                // TODO: Loading/skeleton state?
             }
         }
-
-        // County Picker Dialog
-        if (showCountyPicker) {
-            SubscriptionPickerDialog(
-                title = stringResource(R.string.notifications_select_counties_title),
-                options = uiState.counties.sorted(),
-                selectedOptions = uiState.subscribedCounties,
-                onDismiss = { showCountyPicker = false },
-                onSelectionChanged = { county, selected ->
-                    viewModel.toggleCountySubscription(county, selected)
-                }
+        NotificationsUiState.NoPermissions -> {
+            NotificationsPermissionPrompt(
+                onOpenSettings = {
+                    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    }
+                    context.startActivity(intent)
+                },
             )
         }
-
-        // Waterbody Picker Dialog
-        if (showWaterbodyPicker) {
-            SubscriptionPickerDialog(
-                title = stringResource(R.string.notifications_select_waterbodies_title),
-                options = uiState.waterbodies.sorted(),
-                selectedOptions = uiState.subscribedWaterbodies,
-                onDismiss = { showWaterbodyPicker = false },
-                onSelectionChanged = { waterbody, selected ->
-                    viewModel.toggleWaterbodySubscription(waterbody, selected)
+        is NotificationsUiState.Success -> {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                // Counties Section
+                item {
+                    SectionHeader(
+                        title = stringResource(R.string.notifications_county_section_title),
+                        onEditClick = { showCountyPicker = true }
+                    )
                 }
-            )
+
+                items(state.subscribedCounties.toList().sorted()) { county ->
+                    SubscriptionItem(
+                        text = county,
+                        onRemove = { viewModel.toggleCountySubscription(county, false) }
+                    )
+                }
+
+                item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                // Waterbodies Section
+                item {
+                    SectionHeader(
+                        title = stringResource(R.string.notifications_waterbody_section_title),
+                        onEditClick = { showWaterbodyPicker = true }
+                    )
+                }
+
+                items(state.subscribedWaterbodies.toList().sorted()) { waterbody ->
+                    SubscriptionItem(
+                        text = waterbody,
+                        onRemove = { viewModel.toggleWaterbodySubscription(waterbody, false) }
+                    )
+                }
+            }
+
+            // County Picker Dialog
+            if (showCountyPicker) {
+                SubscriptionPickerDialog(
+                    title = stringResource(R.string.notifications_select_counties_title),
+                    options = state.counties.sorted(),
+                    selectedOptions = state.subscribedCounties,
+                    onDismiss = { showCountyPicker = false },
+                    onSelectionChanged = { county, selected ->
+                        viewModel.toggleCountySubscription(county, selected)
+                    }
+                )
+            }
+
+            // Waterbody Picker Dialog
+            if (showWaterbodyPicker) {
+                SubscriptionPickerDialog(
+                    title = stringResource(R.string.notifications_select_waterbodies_title),
+                    options = state.waterbodies.sorted(),
+                    selectedOptions = state.subscribedWaterbodies,
+                    onDismiss = { showWaterbodyPicker = false },
+                    onSelectionChanged = { waterbody, selected ->
+                        viewModel.toggleWaterbodySubscription(waterbody, selected)
+                    }
+                )
+            }
         }
     }
 }

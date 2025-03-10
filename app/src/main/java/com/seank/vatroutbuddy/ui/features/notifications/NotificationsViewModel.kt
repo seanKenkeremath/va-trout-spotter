@@ -33,17 +33,19 @@ class NotificationsViewModel @Inject constructor(
         subscriptionRepository.getWaterbodySubscriptions(),
         permissionsManager.hasNotificationPermission
     ) { counties, waterbodies, countySubscriptions, waterbodySubscriptions, hasPermission ->
-        NotificationsUiState(
+        if (!hasPermission) {
+            return@combine NotificationsUiState.NoPermissions
+        }
+        NotificationsUiState.Success(
             counties = counties,
             waterbodies = waterbodies,
             subscribedCounties = countySubscriptions.map { it.value }.toSet(),
             subscribedWaterbodies = waterbodySubscriptions.map { it.value }.toSet(),
-            hasNotificationPermission = hasPermission
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = NotificationsUiState()
+        initialValue = NotificationsUiState.Loading
     )
 
     init {
@@ -54,8 +56,6 @@ class NotificationsViewModel @Inject constructor(
     private fun loadAvailableOptions() {
         viewModelScope.launch {
             _counties.value = stockingRepository.getAllCounties()
-            // For waterbodies, we might want to limit to recent ones or implement search
-            // This is just a placeholder implementation
             _waterbodies.value = stockingRepository.getAllWaterbodies()
         }
     }
@@ -85,10 +85,14 @@ class NotificationsViewModel @Inject constructor(
     }
 }
 
-data class NotificationsUiState(
-    val counties: List<String> = emptyList(),
-    val waterbodies: List<String> = emptyList(),
-    val subscribedCounties: Set<String> = emptySet(),
-    val subscribedWaterbodies: Set<String> = emptySet(),
-    val hasNotificationPermission: Boolean = false
-) 
+sealed class NotificationsUiState {
+    data class Success(
+        val counties: List<String>,
+        val waterbodies: List<String>,
+        val subscribedCounties: Set<String>,
+        val subscribedWaterbodies: Set<String>,
+    ) : NotificationsUiState()
+
+    data object Loading : NotificationsUiState()
+    data object NoPermissions : NotificationsUiState()
+}
