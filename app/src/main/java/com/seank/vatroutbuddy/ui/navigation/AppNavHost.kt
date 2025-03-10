@@ -79,7 +79,7 @@ fun AppNavHost() {
             ) {
                 val dialogWindow = (LocalView.current.parent as? DialogWindowProvider)?.window
 
-                SideEffect {
+                LaunchedEffect(Unit) {
                     dialogWindow.let { window ->
                         window?.setWindowAnimations(-1)
                     }
