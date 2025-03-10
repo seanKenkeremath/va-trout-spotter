@@ -39,7 +39,7 @@ import com.seank.vatroutbuddy.R
 import com.seank.vatroutbuddy.domain.model.StockingInfo
 import com.seank.vatroutbuddy.ui.features.detail.StockingDetailScreen
 import com.seank.vatroutbuddy.ui.features.notifications.NotificationsScreen
-import com.seank.vatroutbuddy.ui.features.stockings.HomeScreen
+import com.seank.vatroutbuddy.ui.features.stockings.StockingsScreen
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,7 +87,7 @@ fun AppNavHost() {
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(NavigationRoutes.Stockings.route) {
-                HomeScreen(
+                StockingsScreen(
                     onUpdateAppBar = { actions ->
                         appBarActions = actions
                     },
