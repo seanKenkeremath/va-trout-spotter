@@ -1,6 +1,8 @@
 package com.seank.vatroutbuddy.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
@@ -19,6 +21,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
@@ -29,6 +32,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import com.seank.vatroutbuddy.AppConfig
@@ -43,11 +47,20 @@ import kotlinx.coroutines.delay
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route.orEmpty()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
+                title = {
+                    val textResId = when (currentRoute) {
+                        NavigationRoutes.Stockings.route -> R.string.title_stockings
+                        NavigationRoutes.Notifications.route -> R.string.title_notifications
+                        else -> R.string.app_name
+                    }
+                    Text(stringResource(textResId))
+                },
             )
         },
         bottomBar = { BottomNavigationBar(navController) }
@@ -55,6 +68,12 @@ fun AppNavHost() {
         NavHost(
             navController = navController,
             startDestination = NavigationRoutes.Stockings.route,
+            enterTransition = {
+                EnterTransition.None
+            },
+            exitTransition = {
+                ExitTransition.None
+            },
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(NavigationRoutes.Stockings.route) {
