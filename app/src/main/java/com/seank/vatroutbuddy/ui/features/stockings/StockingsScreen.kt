@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
@@ -102,8 +100,11 @@ fun StockingsScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         when (val state = uiState) {
-            HomeUiState.Loading -> LoadingState()
-            HomeUiState.Empty -> EmptyState()
+            HomeUiState.Uninitialized -> {}
+            HomeUiState.LoadingInitialData -> {
+                StockingsInitialLoad()
+            }
+            HomeUiState.Empty -> StockingsEmpty()
             is HomeUiState.Success -> {
                 val groupedStockings by remember(state.stockings) {
                     mutableStateOf(state.stockings.groupBy { it.date })
@@ -179,16 +180,6 @@ fun StockingsScreen(
                 onDismiss = { showFilters = false }
             )
         }
-    }
-}
-
-@Composable
-private fun LoadingState() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
     }
 }
 

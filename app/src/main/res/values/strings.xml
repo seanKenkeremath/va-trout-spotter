@@ -2,7 +2,12 @@
     <string name="app_name">VA Trout Buddy</string>
     <string name="title_stockings">Stockings</string>
     <string name="title_notifications">Notifications</string>
-    
+
+    <!-- Stockings Screen -->
+    <string name="stockings_initial_load_message">Loading recent stocking records…</string>
+    <string name="stockings_empty_message">No matching records found</string>
+    <string name="stockings_empty_body">Try modifying or clearing your filters</string>
+
     <!-- Notifications Screen -->
     <string name="notifications_county_section_title">County Notifications</string>
     <string name="notifications_waterbody_section_title">Stocking Area Notifications</string>

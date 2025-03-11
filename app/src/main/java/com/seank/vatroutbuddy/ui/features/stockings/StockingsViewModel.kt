@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.seank.vatroutbuddy.data.repository.StockingRepository
 import com.seank.vatroutbuddy.domain.model.StockingInfo
 import com.seank.vatroutbuddy.AppConfig
+import com.seank.vatroutbuddy.di.IoDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,15 +15,17 @@ import kotlinx.coroutines.launch
 import java.util.TreeSet
 import javax.inject.Inject
 import com.seank.vatroutbuddy.domain.usecase.FetchAndNotifyStockingsUseCase
+import kotlinx.coroutines.CoroutineDispatcher
 
 @HiltViewModel
 class StockingsViewModel @Inject constructor(
     private val stockingRepository: StockingRepository,
-    private val fetchAndNotifyStockingsUseCase: FetchAndNotifyStockingsUseCase
+    private val fetchAndNotifyStockingsUseCase: FetchAndNotifyStockingsUseCase,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing = _isRefreshing.asStateFlow()
-    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Uninitialized)
     val uiState = _uiState.asStateFlow()
     private val _pagingState = MutableStateFlow<PagingState>(PagingState.Idle)
     val pagingState = _pagingState.asStateFlow()
@@ -37,17 +40,22 @@ class StockingsViewModel @Inject constructor(
         .thenBy { it?.waterbody }.thenBy { it?.id })
 
     init {
-        fetchLatestStockings()
-        tryToLoadSavedStockings()
-        loadFilterOptions()
+        initialize()
     }
 
-    private fun fetchLatestStockings() {
-        _isRefreshing.value = true
-        if (allStockings.isEmpty()) {
-            _uiState.value = HomeUiState.Loading
-        }
-        viewModelScope.launch {
+    private fun initialize() {
+        viewModelScope.launch(ioDispatcher) {
+            // Load cached data or display initial loading state
+            val hasInitialData = stockingRepository.hasInitialData.first()
+            if (hasInitialData) {
+                loadSavedStockings()
+                loadFilterOptions()
+                _isRefreshing.value = true
+            } else {
+                _uiState.value = HomeUiState.LoadingInitialData
+            }
+
+            // Fetch latest data
             val result = fetchAndNotifyStockingsUseCase.execute()
             _isRefreshing.value = false
             val stockings = result.getOrNull()
@@ -56,24 +64,19 @@ class StockingsViewModel @Inject constructor(
                 _uiState.value = HomeUiState.Error(result.exceptionOrNull()?.message ?: "Error")
                 return@launch
             }
+            loadFilterOptions()
             allStockings.addAll(stockings)
-            _uiState.value = HomeUiState.Success(
-                stockings = allStockings.toList()
-            )
-        }
-    }
-
-    private fun tryToLoadSavedStockings() {
-        viewModelScope.launch {
-            val hasInitialData = stockingRepository.hasInitialData.first()
-            if (hasInitialData) {
-                loadSavedStockings()
+            if (_filters.value == StockingFilters()) {
+                // Only update state with empty filters otherwise we might show invalid data
+                _uiState.value = HomeUiState.Success(
+                    stockings = allStockings.toList()
+                )
             }
         }
     }
 
     private fun loadSavedStockings() {
-        viewModelScope.launch {
+        viewModelScope.launch(ioDispatcher) {
             val filters = _filters.value
             val loadResult = stockingRepository.loadSavedStockings(
                 AppConfig.DEFAULT_PAGE_SIZE,
@@ -89,9 +92,13 @@ class StockingsViewModel @Inject constructor(
             if (!page.hasMore) {
                 _pagingState.value = PagingState.ReachedEnd
             }
-            _uiState.value = HomeUiState.Success(
-                stockings = allStockings.toList()
-            )
+            if (allStockings.isEmpty()) {
+                _uiState.value = HomeUiState.Empty
+            } else {
+                _uiState.value = HomeUiState.Success(
+                    stockings = allStockings.toList()
+                )
+            }
         }
     }
 
@@ -101,7 +108,7 @@ class StockingsViewModel @Inject constructor(
      */
     fun loadMoreStockings() {
         val lastStocking = allStockings.lastOrNull()
-        if (lastStocking == null || 
+        if (lastStocking == null ||
             (_pagingState.value is PagingState.Loading) ||
             (_pagingState.value is PagingState.ReachedEnd)
         ) {
@@ -117,7 +124,7 @@ class StockingsViewModel @Inject constructor(
                 pageSize = AppConfig.DEFAULT_PAGE_SIZE,
                 stockingFilters = _filters.value
             )
-            
+
             val page = result.getOrNull()
             if (page == null) {
                 _pagingState.value = PagingState.Error(result.exceptionOrNull())
@@ -152,17 +159,15 @@ class StockingsViewModel @Inject constructor(
         }
     }
 
-    private fun loadFilterOptions() {
-        viewModelScope.launch {
-            _availableCounties.value = stockingRepository.getAllCounties()
-        }
+    private suspend fun loadFilterOptions() {
+        _availableCounties.value = stockingRepository.getAllCounties()
     }
 
     fun updateFilters(newFilters: StockingFilters) {
         _filters.value = newFilters
         // Clear existing stockings and reload with new filters
         allStockings.clear()
-        _uiState.value = HomeUiState.Loading
+        _uiState.value = HomeUiState.Uninitialized
         _pagingState.value = PagingState.Idle
         loadSavedStockings()
     }
@@ -173,9 +178,11 @@ class StockingsViewModel @Inject constructor(
 }
 
 sealed class HomeUiState {
-    data object Loading : HomeUiState()
+    data object Uninitialized : HomeUiState()
+    data object LoadingInitialData : HomeUiState()
     data object Empty : HomeUiState()
     data class Success(val stockings: List<StockingInfo>) : HomeUiState()
+
     // TODO: Display error + retry
     data class Error(val message: String) : HomeUiState()
 }

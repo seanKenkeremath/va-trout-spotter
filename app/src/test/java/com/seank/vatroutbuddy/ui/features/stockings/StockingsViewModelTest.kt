@@ -11,8 +11,10 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -56,10 +58,10 @@ class StockingsViewModelTest {
         coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(mockStockings)
         coEvery { repository.loadSavedStockings(pageSize = any(), stockingFilters = any()) } returns Result.success(mockPage)
 
-        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
+        createViewModel()
 
         // Initial state should be Loading
-        assertTrue(viewModel.uiState.value is HomeUiState.Loading)
+        assertTrue(viewModel.uiState.value is HomeUiState.Uninitialized)
 
         // Advance time to complete loading
         advanceUntilIdle()
@@ -85,10 +87,10 @@ class StockingsViewModelTest {
             )
         )
 
-        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
+        createViewModel()
 
         // Initial state should be Loading
-        assertTrue(viewModel.uiState.value is HomeUiState.Loading)
+        assertTrue(viewModel.uiState.value is HomeUiState.Uninitialized)
 
         // Advance time to complete loading
         advanceUntilIdle()
@@ -100,22 +102,27 @@ class StockingsViewModelTest {
     }
 
     @Test
-    fun `isRefreshing is true during fetch and false after completion`() = runTest {
+    fun `isRefreshing is true during fetch with saved data and false after completion`() = runTest {
         val mockStockings = createMockStockings(5)
         val mockPage = StockingsListPage(mockStockings, true)
 
         // Set up repository to delay returning results
-        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(mockStockings)
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } coAnswers {
+            delay(500L)
+            Result.success(mockStockings)
+        }
         coEvery {
             repository.loadSavedStockings(
                 pageSize = any(),
                 stockingFilters = any()
             )
         } returns Result.success(mockPage)
+        hasInitialDataFlow.value = true
 
-        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
+        createViewModel()
 
-        // isRefreshing should be true initially
+        // isRefreshing should be true during load
+        advanceTimeBy(250L)
         assertTrue(viewModel.isRefreshing.value)
 
         // Advance time to complete loading
@@ -149,7 +156,7 @@ class StockingsViewModelTest {
             )
         } returns Result.success(additionalPage)
 
-        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
+        createViewModel()
         advanceUntilIdle()
 
         // Verify initial state
@@ -193,7 +200,7 @@ class StockingsViewModelTest {
             )
         } returns Result.failure(Exception(errorMessage))
 
-        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
+        createViewModel()
         advanceUntilIdle()
 
         // Verify initial paging state
@@ -237,7 +244,7 @@ class StockingsViewModelTest {
         coEvery { repository.fetchHistoricalData() } returns Result.success(historicalStockings)
         hasHistoricalDataFlow.value = false
 
-        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
+        createViewModel()
         advanceUntilIdle()
 
         // Verify initial paging state
@@ -283,7 +290,7 @@ class StockingsViewModelTest {
             } returns Result.success(emptyPage)
             hasHistoricalDataFlow.value = true
 
-            viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
+            createViewModel()
             advanceUntilIdle()
 
             // Verify initial paging state
@@ -326,7 +333,7 @@ class StockingsViewModelTest {
         hasHistoricalDataFlow.value = false
         coEvery { repository.fetchHistoricalData() } returns Result.failure(Exception("Failed to fetch historical data"))
 
-        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
+        createViewModel()
         advanceUntilIdle()
 
         // Verify initial paging state
@@ -367,7 +374,7 @@ class StockingsViewModelTest {
             )
         } returns Result.success(filteredPage)
 
-        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
+        createViewModel()
         advanceUntilIdle()
 
         // Verify initial state
@@ -410,7 +417,7 @@ class StockingsViewModelTest {
             )
         } returns Result.success(filteredPage)
 
-        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
+        createViewModel()
         advanceUntilIdle()
 
         // Apply filters
@@ -460,7 +467,7 @@ class StockingsViewModelTest {
             )
         } returns Result.success(nextPage)
 
-        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase)
+        createViewModel()
         viewModel.updateFilters(filters)
         advanceUntilIdle()
 
@@ -477,6 +484,10 @@ class StockingsViewModelTest {
         val updatedState = viewModel.uiState.value as HomeUiState.Success
         assertEquals(8, updatedState.stockings.size)
         assertTrue(updatedState.stockings.all { it.county == "Filtered County" })
+    }
+
+    private fun createViewModel() {
+        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase, testDispatcher)
     }
 
     private fun createMockStockings(count: Int, startId: Int = 1, county: String? = null): List<StockingInfo> {
