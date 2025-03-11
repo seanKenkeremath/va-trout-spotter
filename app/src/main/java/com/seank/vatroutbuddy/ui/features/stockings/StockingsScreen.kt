@@ -102,9 +102,9 @@ fun StockingsScreen(
         when (val state = uiState) {
             HomeUiState.Uninitialized -> {}
             HomeUiState.LoadingInitialData -> {
-                StockingsInitialLoad()
+                StockingsInitialLoad(modifier = Modifier.fillMaxSize())
             }
-            HomeUiState.Empty -> StockingsEmpty()
+            HomeUiState.Empty -> StockingsEmpty(modifier = Modifier.fillMaxSize())
             is HomeUiState.Success -> {
                 val groupedStockings by remember(state.stockings) {
                     mutableStateOf(state.stockings.groupBy { it.date })

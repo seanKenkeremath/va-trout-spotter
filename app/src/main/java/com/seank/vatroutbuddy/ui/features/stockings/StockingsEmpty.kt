@@ -20,11 +20,11 @@ import com.seank.vatroutbuddy.R
 import com.seank.vatroutbuddy.ui.theme.AppTheme
 
 @Composable
-fun StockingsEmpty() {
+fun StockingsEmpty(modifier: Modifier = Modifier) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize().padding(32.dp)
+        modifier = modifier.padding(32.dp)
     ) {
         Text(
             text = stringResource(R.string.stockings_empty_message),

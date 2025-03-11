@@ -21,11 +21,11 @@ import com.seank.vatroutbuddy.R
 import com.seank.vatroutbuddy.ui.theme.AppTheme
 
 @Composable
-fun StockingsInitialLoad() {
+fun StockingsInitialLoad(modifier: Modifier = Modifier) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize().padding(32.dp)
+        modifier = modifier.padding(32.dp)
     ) {
         Text(
             text = stringResource(R.string.stockings_initial_load_message),
