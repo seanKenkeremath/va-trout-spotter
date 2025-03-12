@@ -44,7 +44,7 @@ import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavHost() {
+fun AppNavHost(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
@@ -73,7 +73,8 @@ fun AppNavHost() {
                 actions = { appBarActions.forEach { it() } }
             )
         },
-        bottomBar = { BottomNavigationBar(navController) }
+        bottomBar = { BottomNavigationBar(navController) },
+        modifier = modifier,
     ) { paddingValues ->
         NavHost(
             navController = navController,
