@@ -1,12 +1,12 @@
-@file:OptIn(ExperimentalFoundationApi::class)
-
 package com.seank.vatroutbuddy.ui.features.stockings
 
 import FilterBottomSheet
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,11 +19,14 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,9 +48,9 @@ import com.seank.vatroutbuddy.domain.model.StockingInfo
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun StockingsScreen(
-    onUpdateAppBar: (List<@Composable () -> Unit>) -> Unit,
     onStockingClick: (StockingInfo) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: StockingsViewModel = hiltViewModel()
@@ -71,114 +75,119 @@ fun StockingsScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        onUpdateAppBar(
-            listOf {
-                BadgedBox(
-                    badge = {
-                        if (filters.activeFilterCount > 0) {
-                            // TODO: centralize padding/use adaptive dimens
-                            // This should be half of padding
-                            Badge(modifier = Modifier.offset(x = (-8).dp, y = 8.dp)) {
-                                Text(
-                                    filters.activeFilterCount.toString()
-                                )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.title_stockings)) },
+                actions = {
+                    BadgedBox(
+                        badge = {
+                            if (filters.activeFilterCount > 0) {
+                                Badge(modifier = Modifier.offset(x = (-8).dp, y = 8.dp)) {
+                                    Text(filters.activeFilterCount.toString())
+                                }
+                            }
+                        },
+                    ) {
+                        IconButton(onClick = { showFilters = true }) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_filter_black_24dp),
+                                contentDescription = "Filters"
+                            )
+                        }
+                    }
+                }
+            )
+        },
+        // We have consumed the bottom padding for the nav bar in the parent scaffold
+        contentWindowInsets = WindowInsets(0.dp),
+        modifier = modifier
+    ) { paddingValues ->
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+        ) {
+            when (val state = uiState) {
+                HomeUiState.Uninitialized -> {}
+                HomeUiState.LoadingInitialData -> {
+                    StockingsInitialLoad(modifier = Modifier.fillMaxSize())
+                }
+                HomeUiState.Empty -> StockingsEmpty(modifier = Modifier.fillMaxSize())
+                is HomeUiState.Success -> {
+                    val groupedStockings by remember(state.stockings) {
+                        mutableStateOf(state.stockings.groupBy { it.date })
+                    }
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        // Other padding is applied in child Composables
+                        contentPadding = PaddingValues(bottom = 16.dp),
+                        content = {
+                            for ((date, stockings) in groupedStockings) {
+                                stickyHeader {
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text(
+                                            text = date.format(DateTimeFormatter.ofPattern("MMM d, yyyy")),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            modifier = Modifier.padding(16.dp)
+                                        )
+                                    }
+                                }
+                                items(items = stockings, key = {
+                                    "${it.date}, ${it.waterbody}, ${it.date}"
+                                }) { stocking ->
+                                    StockingItem(
+                                        stocking = stocking,
+                                        onClick = { onStockingClick(stocking) }
+                                    )
+                                }
+                            }
+                            if (pagingState is PagingState.Loading) {
+                                item {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .padding(16.dp)
+                                            .align(Alignment.Center)
+                                    )
+                                }
                             }
                         }
-                    },
-                ) {
-                    IconButton(onClick = { showFilters = true }) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_filter_black_24dp),
-                            contentDescription = "Filters"
+                    )
+                }
+
+                is HomeUiState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = state.message,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(16.dp)
                         )
                     }
                 }
             }
-        )
-    }
 
-    Box(modifier = modifier.fillMaxSize()) {
-        when (val state = uiState) {
-            HomeUiState.Uninitialized -> {}
-            HomeUiState.LoadingInitialData -> {
-                StockingsInitialLoad(modifier = Modifier.fillMaxSize())
-            }
-            HomeUiState.Empty -> StockingsEmpty(modifier = Modifier.fillMaxSize())
-            is HomeUiState.Success -> {
-                val groupedStockings by remember(state.stockings) {
-                    mutableStateOf(state.stockings.groupBy { it.date })
+            LaunchedEffect(shouldStartPaginate) {
+                if (shouldStartPaginate) {
+                    viewModel.loadMoreStockings()
                 }
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.fillMaxSize(),
-                    content = {
-                        for ((date, stockings) in groupedStockings) {
-                            stickyHeader {
-                                Surface(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
+            }
 
-                                ) {
-                                    Text(
-                                        text = date.format(DateTimeFormatter.ofPattern("MMM d, yyyy")),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        modifier = Modifier.padding(16.dp)
-                                    )
-                                }
-                            }
-                            items(items = stockings, key = {
-                                "${it.date}, ${it.waterbody}, ${it.date}"
-                            }) { stocking ->
-                                StockingItem(
-                                    stocking = stocking,
-                                    onClick = { onStockingClick(stocking) }
-                                )
-                            }
-                        }
-                        if (pagingState is PagingState.Loading) {
-                            item {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .padding(16.dp)
-                                        .align(Alignment.Center)
-                                )
-                            }
-                        }
-                    }
+            // Filter bottom sheet
+            if (showFilters) {
+                FilterBottomSheet(
+                    filters = filters,
+                    availableCounties = availableCounties,
+                    onFiltersChanged = viewModel::updateFilters,
+                    onClearFilters = viewModel::clearFilters,
+                    onDismiss = { showFilters = false }
                 )
             }
-
-            is HomeUiState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = state.message,
-                        color = MaterialTheme.colorScheme.error,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
-        }
-
-        LaunchedEffect(shouldStartPaginate) {
-            if (shouldStartPaginate) {
-                viewModel.loadMoreStockings()
-            }
-        }
-
-        // Filter bottom sheet
-        if (showFilters) {
-            FilterBottomSheet(
-                filters = filters,
-                availableCounties = availableCounties,
-                onFiltersChanged = viewModel::updateFilters,
-                onClearFilters = viewModel::clearFilters,
-                onDismiss = { showFilters = false }
-            )
         }
     }
 }
