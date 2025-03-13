@@ -8,6 +8,12 @@
     <string name="stockings_empty_message">No matching records found</string>
     <string name="stockings_empty_body">Try modifying or clearing your filters</string>
 
+    <!-- Waterbody detail -->
+    <string name="waterbody_details_header">About this location</string>
+    <string name="waterbody_county_label">County</string>
+    <string name="waterbody_category_label">Category</string>
+    <string name="waterbody_is_national_forest_water">National Forest Water</string>
+
     <!-- Notifications Screen -->
     <string name="notifications_county_section_title">County Notifications</string>
     <string name="notifications_waterbody_section_title">Stocking Area Notifications</string>

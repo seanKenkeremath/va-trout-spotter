@@ -48,7 +48,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.seank.vatroutbuddy.AppConfig
 import com.seank.vatroutbuddy.R
 import com.seank.vatroutbuddy.domain.model.StockingInfo
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -208,39 +207,6 @@ fun StockingsScreen(
             }
         }
     }
-}
-
-@Composable
-private fun EmptyState() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "No data",
-            color = MaterialTheme.colorScheme.error,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Composable
-private fun LastUpdatedText(
-    lastUpdated: LocalDateTime,
-    modifier: Modifier = Modifier
-) {
-    val formattedTime = remember(lastUpdated) {
-        val formatter = DateTimeFormatter.ofPattern("MMM d, h:mm a")
-        lastUpdated.format(formatter)
-    }
-
-    Text(
-        text = "Last updated: $formattedTime",
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier
-    )
 }
 
 @Composable

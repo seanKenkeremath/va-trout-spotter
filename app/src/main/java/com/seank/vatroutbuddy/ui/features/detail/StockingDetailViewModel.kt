@@ -9,6 +9,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -17,6 +18,9 @@ class StockingDetailViewModel @AssistedInject constructor(
     @Assisted private val stocking: StockingInfo,
     private val repository: StockingRepository,
 ) : ViewModel() {
+
+    private val _locationName = MutableStateFlow<String>(stocking.waterbody)
+    val locationName: StateFlow<String> = _locationName.asStateFlow()
 
     private val _uiState = MutableStateFlow<StockingDetailUiState>(StockingDetailUiState.Loading)
     val uiState = _uiState.asStateFlow()
