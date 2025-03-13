@@ -39,8 +39,8 @@ class NotificationsViewModel @Inject constructor(
         NotificationsUiState.Success(
             counties = counties,
             waterbodies = waterbodies,
-            subscribedCounties = countySubscriptions.map { it.value }.toSet(),
-            subscribedWaterbodies = waterbodySubscriptions.map { it.value }.toSet(),
+            subscribedCounties = countySubscriptions.map { it.value },
+            subscribedWaterbodies = waterbodySubscriptions.map { it.value },
         )
     }.stateIn(
         scope = viewModelScope,
@@ -89,8 +89,8 @@ sealed class NotificationsUiState {
     data class Success(
         val counties: List<String>,
         val waterbodies: List<String>,
-        val subscribedCounties: Set<String>,
-        val subscribedWaterbodies: Set<String>,
+        val subscribedCounties: List<String>,
+        val subscribedWaterbodies: List<String>,
     ) : NotificationsUiState()
 
     data object Loading : NotificationsUiState()

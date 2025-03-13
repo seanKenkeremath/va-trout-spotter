@@ -1,9 +1,13 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.seank.vatroutbuddy.ui.features.notifications
 
 import android.content.Intent
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Notifications
@@ -25,25 +30,29 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -51,28 +60,66 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.seank.vatroutbuddy.R
+
+@Composable
+fun NotificationsScreen(
+    modifier: Modifier = Modifier,
+    viewModel: NotificationsViewModel = hiltViewModel(),
+    collapsibleToolbar: Boolean = true,
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    NotificationsScreenContent(
+        uiState = uiState,
+        collapsibleToolbar = collapsibleToolbar,
+        refreshPermissions = viewModel::refreshPermissions,
+        requestNotificationPermissions = viewModel::requestNotificationPermission,
+        toggleWaterbodySubscription = viewModel::toggleWaterbodySubscription,
+        toggleCountySubscription = viewModel::toggleCountySubscription,
+        modifier = modifier
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationsScreen(
-    viewModel: NotificationsViewModel = hiltViewModel()
+private fun NotificationsScreenContent(
+    uiState: NotificationsUiState,
+    collapsibleToolbar: Boolean,
+    refreshPermissions: () -> Unit,
+    requestNotificationPermissions: (permissionLauncher: ActivityResultLauncher<String>) -> Unit,
+    toggleWaterbodySubscription: (String, Boolean) -> Unit,
+    toggleCountySubscription: (String, Boolean) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     val context = LocalContext.current
     var showCountyPicker by remember { mutableStateOf(false) }
     var showWaterbodyPicker by remember { mutableStateOf(false) }
     var hasRequestedPermission by remember { mutableStateOf(false) }
 
+    // We want the top app bar to scroll away ONLY if there is content to scroll,
+    // but we also want to make sure that if the app bar is collapsed we can still expand it
+    val listState = rememberLazyListState()
+    val topAppBarState = rememberTopAppBarState()
+    val isCollapsed by remember { derivedStateOf { topAppBarState.collapsedFraction > 0f } }
+    val canScroll by remember { derivedStateOf { isCollapsed || listState.canScrollForward || listState.canScrollBackward } }
+    val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        state = topAppBarState,
+        canScroll = { collapsibleToolbar && canScroll }
+    )
+
+    val topAppBarColors = TopAppBarDefaults.topAppBarColors(
+        scrolledContainerColor = MaterialTheme.colorScheme.surface
+    )
+
     val lifecycleOwner = LocalLifecycleOwner.current
     val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
-    
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            viewModel.refreshPermissions()
+            refreshPermissions()
         }
     }
 
@@ -80,7 +127,7 @@ fun NotificationsScreen(
     LaunchedEffect(Unit) {
         if (!hasRequestedPermission && uiState is NotificationsUiState.NoPermissions) {
             hasRequestedPermission = true
-            viewModel.requestNotificationPermission(permissionLauncher)
+            requestNotificationPermissions(permissionLauncher)
         }
     }
 
@@ -88,8 +135,9 @@ fun NotificationsScreen(
     LaunchedEffect(lifecycleState) {
         when (lifecycleState) {
             Lifecycle.State.RESUMED -> {
-                viewModel.refreshPermissions()
+                refreshPermissions()
             }
+
             else -> {}
         }
     }
@@ -97,98 +145,117 @@ fun NotificationsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.title_notifications)) }
+                title = { Text(stringResource(R.string.title_notifications)) },
+                colors = topAppBarColors,
+                // We have already consumed the top system bar insets
+                windowInsets = WindowInsets(0.dp),
+                scrollBehavior = topBarScrollBehavior
             )
         },
         // We have consumed the bottom padding for the nav bar in the parent scaffold
         contentWindowInsets = WindowInsets(0.dp),
+        modifier = modifier.nestedScroll(topBarScrollBehavior.nestedScrollConnection)
     ) { paddingValues ->
-        when (val state = uiState) {
-            NotificationsUiState.Loading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    // TODO: Loading/skeleton state?
-                }
-            }
-            NotificationsUiState.NoPermissions -> {
-                NotificationsPermissionPrompt(
-                    onOpenSettings = {
-                        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                        }
-                        context.startActivity(intent)
-                    },
-                    modifier = Modifier.padding(paddingValues)
-                )
-            }
-            is NotificationsUiState.Success -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentPadding = PaddingValues(16.dp)
-                ) {
-                    // Counties Section
-                    item {
-                        SectionHeader(
-                            title = stringResource(R.string.notifications_county_section_title),
-                            onEditClick = { showCountyPicker = true }
-                        )
-                    }
-
-                    items(state.subscribedCounties.toList().sorted()) { county ->
-                        SubscriptionItem(
-                            text = county,
-                            onRemove = { viewModel.toggleCountySubscription(county, false) }
-                        )
-                    }
-
-                    item { Spacer(modifier = Modifier.height(24.dp)) }
-
-                    // Waterbodies Section
-                    item {
-                        SectionHeader(
-                            title = stringResource(R.string.notifications_waterbody_section_title),
-                            onEditClick = { showWaterbodyPicker = true }
-                        )
-                    }
-
-                    items(state.subscribedWaterbodies.toList().sorted()) { waterbody ->
-                        SubscriptionItem(
-                            text = waterbody,
-                            onRemove = { viewModel.toggleWaterbodySubscription(waterbody, false) }
-                        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when (uiState) {
+                NotificationsUiState.Loading -> {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        // TODO: Loading/skeleton state?
                     }
                 }
 
-                // County Picker Dialog
-                if (showCountyPicker) {
-                    SubscriptionPickerDialog(
-                        title = stringResource(R.string.notifications_select_counties_title),
-                        options = state.counties.sorted(),
-                        selectedOptions = state.subscribedCounties,
-                        onDismiss = { showCountyPicker = false },
-                        onSelectionChanged = { county, selected ->
-                            viewModel.toggleCountySubscription(county, selected)
-                        }
+                NotificationsUiState.NoPermissions -> {
+                    NotificationsPermissionPrompt(
+                        onOpenSettings = {
+                            val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                            }
+                            context.startActivity(intent)
+                        },
                     )
                 }
 
-                // Waterbody Picker Dialog
-                if (showWaterbodyPicker) {
-                    SubscriptionPickerDialog(
-                        title = stringResource(R.string.notifications_select_waterbodies_title),
-                        options = state.waterbodies.sorted(),
-                        selectedOptions = state.subscribedWaterbodies,
-                        onDismiss = { showWaterbodyPicker = false },
-                        onSelectionChanged = { waterbody, selected ->
-                            viewModel.toggleWaterbodySubscription(waterbody, selected)
+                is NotificationsUiState.Success -> {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp)
+                    ) {
+                        // Counties Section
+                        stickyHeader {
+                            SectionHeader(
+                                title = stringResource(R.string.notifications_county_section_title),
+                                onEditClick = { showCountyPicker = true }
+                            )
                         }
-                    )
+
+                        items(
+                            items = uiState.subscribedCounties,
+                            key = { it }
+                        ) { county ->
+                            SubscriptionItem(
+                                text = county,
+                                onRemove = { toggleCountySubscription(county, false) }
+                            )
+                        }
+
+                        // Waterbodies Section
+                        stickyHeader {
+                            SectionHeader(
+                                title = stringResource(R.string.notifications_waterbody_section_title),
+                                onEditClick = { showWaterbodyPicker = true }
+                            )
+                        }
+
+                        items(
+                            items = uiState.subscribedWaterbodies,
+                            key = { it }
+                        ) { waterbody ->
+                            SubscriptionItem(
+                                text = waterbody,
+                                onRemove = {
+                                    toggleWaterbodySubscription(
+                                        waterbody,
+                                        false
+                                    )
+                                }
+                            )
+                        }
+                    }
+
+                    // County Picker Dialog
+                    if (showCountyPicker) {
+                        SubscriptionPickerDialog(
+                            title = stringResource(R.string.notifications_select_counties_title),
+                            options = uiState.counties.sorted(),
+                            selectedOptions = uiState.subscribedCounties,
+                            onDismiss = { showCountyPicker = false },
+                            onSelectionChanged = { county, selected ->
+                                toggleCountySubscription(county, selected)
+                            }
+                        )
+                    }
+
+                    // Waterbody Picker Dialog
+                    if (showWaterbodyPicker) {
+                        SubscriptionPickerDialog(
+                            title = stringResource(R.string.notifications_select_waterbodies_title),
+                            options = uiState.waterbodies.sorted(),
+                            selectedOptions = uiState.subscribedWaterbodies,
+                            onDismiss = { showWaterbodyPicker = false },
+                            onSelectionChanged = { waterbody, selected ->
+                                toggleWaterbodySubscription(waterbody, selected)
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -201,19 +268,21 @@ private fun SectionHeader(
     onEditClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge
-        )
-        TextButton(onClick = onEditClick) {
-            Text(stringResource(R.string.notifications_edit_button).uppercase())
+    Surface {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge
+            )
+            TextButton(onClick = onEditClick) {
+                Text(stringResource(R.string.notifications_edit_button).uppercase())
+            }
         }
     }
 }
@@ -255,7 +324,7 @@ private fun SubscriptionItem(
 private fun SubscriptionPickerDialog(
     title: String,
     options: List<String>,
-    selectedOptions: Set<String>,
+    selectedOptions: List<String>,
     onDismiss: () -> Unit,
     onSelectionChanged: (String, Boolean) -> Unit
 ) {
@@ -309,24 +378,24 @@ private fun NotificationsPermissionPrompt(
                 modifier = Modifier.padding(bottom = 16.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
-            
+
             Text(
                 text = stringResource(R.string.notifications_permission_title),
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Text(
                 text = stringResource(R.string.notifications_permission_description),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             Button(
                 onClick = onOpenSettings
             ) {

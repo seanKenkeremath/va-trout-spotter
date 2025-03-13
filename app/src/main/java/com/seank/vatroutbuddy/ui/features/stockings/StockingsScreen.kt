@@ -27,6 +27,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -53,7 +56,8 @@ import java.time.format.DateTimeFormatter
 fun StockingsScreen(
     onStockingClick: (StockingInfo) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: StockingsViewModel = hiltViewModel()
+    viewModel: StockingsViewModel = hiltViewModel(),
+    collapsibleToolbar: Boolean = true,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pagingState by viewModel.pagingState.collectAsState()
@@ -61,7 +65,15 @@ fun StockingsScreen(
     val availableCounties by viewModel.availableCounties.collectAsState()
     var showFilters by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
-
+    val canScroll by remember { derivedStateOf { listState.canScrollForward || listState.canScrollBackward } }
+    val topAppBarState = rememberTopAppBarState()
+    val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        state = topAppBarState,
+        canScroll = { collapsibleToolbar && canScroll }
+    )
+    val topAppBarColors = TopAppBarDefaults.topAppBarColors(
+        scrolledContainerColor = MaterialTheme.colorScheme.surface
+    )
     val shouldStartPaginate by remember {
         derivedStateOf {
             if (pagingState is PagingState.Idle) {
@@ -79,6 +91,7 @@ fun StockingsScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.title_stockings)) },
+                colors = topAppBarColors,
                 actions = {
                     BadgedBox(
                         badge = {
@@ -96,22 +109,27 @@ fun StockingsScreen(
                             )
                         }
                     }
-                }
+                },
+                scrollBehavior = topBarScrollBehavior,
+                // We have already consumed the top system bar insets
+                windowInsets = WindowInsets(0.dp),
             )
         },
         // We have consumed the bottom padding for the nav bar in the parent scaffold
         contentWindowInsets = WindowInsets(0.dp),
-        modifier = modifier
+        modifier = modifier.nestedScroll(topBarScrollBehavior.nestedScrollConnection)
     ) { paddingValues ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
             when (val state = uiState) {
                 HomeUiState.Uninitialized -> {}
                 HomeUiState.LoadingInitialData -> {
                     StockingsInitialLoad(modifier = Modifier.fillMaxSize())
                 }
+
                 HomeUiState.Empty -> StockingsEmpty(modifier = Modifier.fillMaxSize())
                 is HomeUiState.Success -> {
                     val groupedStockings by remember(state.stockings) {
