@@ -21,5 +21,5 @@ object AppConfig {
     const val MODAL_ANIMATION_DURATION = 300
 
     // Nav
-    val ALLOW_COLLAPSIBLE_NAV = false
+    const val ALLOW_COLLAPSIBLE_NAV = false
 } 

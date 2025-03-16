@@ -1,4 +1,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.VATroutBuddy" parent="Theme.Material3.DayNight.NoActionBar"/>
+    <style name="Theme.VATroutBuddy" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">#0000</item>
+        <item name="android:navigationBarColor">#0000</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowLightStatusBar">@bool/light_status_bar</item>
+    </style>
+
 </resources>

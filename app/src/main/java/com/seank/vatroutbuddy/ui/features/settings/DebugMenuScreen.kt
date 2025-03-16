@@ -38,10 +38,8 @@ fun DebugMenuScreen(
                         )
                     }
                 },
-                windowInsets = WindowInsets(0.dp)
             )
         },
-        contentWindowInsets = WindowInsets(0.dp),
         modifier = modifier
     ) { paddingValues ->
         Box(

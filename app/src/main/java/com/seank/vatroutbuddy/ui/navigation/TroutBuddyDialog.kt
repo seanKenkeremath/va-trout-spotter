@@ -5,10 +5,8 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -69,10 +67,8 @@ fun TroutBuddyDialog(
     ) {
         Surface(
             modifier = Modifier
-                .background(
-                    MaterialTheme.colorScheme.surface
-                )
                 .fillMaxSize(),
+            shadowElevation = 40.dp,
             shape = RoundedCornerShape(cornerRadius)
         ) {
             content({ visible = false })

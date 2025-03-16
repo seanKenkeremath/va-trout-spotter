@@ -55,7 +55,8 @@ fun AppNavHost(modifier: Modifier = Modifier) {
             dialog(
                 route = NavigationRoutes.StockingDetail.route,
                 dialogProperties = DialogProperties(
-                    usePlatformDefaultWidth = false
+                    usePlatformDefaultWidth = false,
+                    decorFitsSystemWindows = false,
                 ),
             ) {
                 val stocking = navController.previousBackStackEntry
@@ -84,7 +85,10 @@ fun AppNavHost(modifier: Modifier = Modifier) {
 
             dialog(
                 route = NavigationRoutes.DebugMenu.route,
-                dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
+                dialogProperties = DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    decorFitsSystemWindows = false,
+                ),
             ) {
                 TroutBuddyDialog(navController) { onBackClick ->
                     DebugMenuScreen(
@@ -95,7 +99,10 @@ fun AppNavHost(modifier: Modifier = Modifier) {
 
             dialog(
                 route = NavigationRoutes.About.route,
-                dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
+                dialogProperties = DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    decorFitsSystemWindows = false,
+                ),
             ) {
                 TroutBuddyDialog(navController) { onBackClick ->
                     AboutScreen(
@@ -106,7 +113,10 @@ fun AppNavHost(modifier: Modifier = Modifier) {
 
             dialog(
                 route = NavigationRoutes.Contributions.route,
-                dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
+                dialogProperties = DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    decorFitsSystemWindows = false,
+                ),
             ) {
                 TroutBuddyDialog(navController) { onBackClick ->
                     ContributionsScreen(
