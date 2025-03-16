@@ -68,7 +68,6 @@ fun WavyLoadingIndicator(
 
     Canvas(
         modifier = modifier
-            .fillMaxSize()
     ) {
 
         /*
