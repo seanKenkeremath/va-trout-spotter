@@ -66,7 +66,7 @@ import com.seank.vatroutbuddy.R
 fun NotificationsScreen(
     modifier: Modifier = Modifier,
     viewModel: NotificationsViewModel = hiltViewModel(),
-    collapsibleToolbar: Boolean = true,
+    collapsibleToolbar: Boolean = false,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     NotificationsScreenContent(

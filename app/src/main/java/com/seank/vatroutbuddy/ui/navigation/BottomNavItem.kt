@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.seank.vatroutbuddy.R
 
@@ -21,5 +22,10 @@ enum class BottomNavItem(
         route = NavigationRoutes.Notifications.route,
         icon = Icons.Default.Notifications,
         labelResId = R.string.title_notifications
+    ),
+    Settings(
+        route = NavigationRoutes.Settings.route,
+        icon = Icons.Default.Settings,
+        labelResId = R.string.title_settings
     )
 } 

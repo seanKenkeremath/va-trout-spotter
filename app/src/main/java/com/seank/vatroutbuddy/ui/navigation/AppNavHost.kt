@@ -31,11 +31,16 @@ import com.seank.vatroutbuddy.domain.model.StockingInfo
 import com.seank.vatroutbuddy.ui.features.detail.StockingDetailScreen
 import com.seank.vatroutbuddy.ui.features.notifications.NotificationsScreen
 import com.seank.vatroutbuddy.ui.features.stockings.StockingsScreen
+import com.seank.vatroutbuddy.ui.features.settings.AboutScreen
+import com.seank.vatroutbuddy.ui.features.settings.ContributionsScreen
+import com.seank.vatroutbuddy.ui.features.settings.DebugMenuScreen
+import com.seank.vatroutbuddy.ui.features.settings.SettingsScreen
 import kotlinx.coroutines.delay
 
 @Composable
 fun AppNavHost(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
+    val collapsibleNav = AppConfig.ALLOW_COLLAPSIBLE_NAV
     Scaffold(
         bottomBar = {
             BottomNavigationBar(navController)
@@ -55,12 +60,13 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                             stocking
                         )
                         navController.navigate(NavigationRoutes.StockingDetail.route)
-                    }
+                    },
+                    collapsibleToolbar = collapsibleNav,
                 )
             }
 
             composable(NavigationRoutes.Notifications.route) {
-                NotificationsScreen()
+                NotificationsScreen(collapsibleToolbar = collapsibleNav)
             }
 
             dialog(
@@ -122,6 +128,33 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                         }
                     }
                 }
+            }
+
+            composable(NavigationRoutes.Settings.route) {
+                SettingsScreen(
+                    onDebugMenuClick = { navController.navigate(NavigationRoutes.DebugMenu.route) },
+                    onAboutClick = { navController.navigate(NavigationRoutes.About.route) },
+                    onContributionsClick = { navController.navigate(NavigationRoutes.Contributions.route) },
+                    collapsibleToolbar = collapsibleNav,
+                )
+            }
+
+            composable(NavigationRoutes.DebugMenu.route) {
+                DebugMenuScreen(
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable(NavigationRoutes.About.route) {
+                AboutScreen(
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable(NavigationRoutes.Contributions.route) {
+                ContributionsScreen(
+                    onBackClick = { navController.popBackStack() }
+                )
             }
         }
     }

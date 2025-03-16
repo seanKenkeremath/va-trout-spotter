@@ -56,7 +56,7 @@ fun StockingsScreen(
     onStockingClick: (StockingInfo) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: StockingsViewModel = hiltViewModel(),
-    collapsibleToolbar: Boolean = true,
+    collapsibleToolbar: Boolean = false,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pagingState by viewModel.pagingState.collectAsState()
