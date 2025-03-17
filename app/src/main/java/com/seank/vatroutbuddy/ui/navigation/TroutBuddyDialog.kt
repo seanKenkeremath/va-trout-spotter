@@ -68,10 +68,9 @@ fun TroutBuddyDialog(
         Surface(
             modifier = Modifier
                 .fillMaxSize(),
-            shadowElevation = 40.dp,
             shape = RoundedCornerShape(cornerRadius)
         ) {
-            content({ visible = false })
+            content { visible = false }
         }
         // Wait for animation to complete before popping backstack
         LaunchedEffect(visible) {

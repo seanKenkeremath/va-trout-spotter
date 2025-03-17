@@ -1,11 +1,14 @@
 package com.seank.vatroutbuddy.ui.navigation
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
+import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavController
+import androidx.navigation.NavDeepLink
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
@@ -52,26 +55,18 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                 NotificationsScreen(collapsibleToolbar = collapsibleNav)
             }
 
-            dialog(
+            fullscreenDialog(
                 route = NavigationRoutes.StockingDetail.route,
-                dialogProperties = DialogProperties(
-                    usePlatformDefaultWidth = false,
-                    decorFitsSystemWindows = false,
-                ),
-            ) {
+                navController = navController,
+            ) { onBackClick ->
                 val stocking = navController.previousBackStackEntry
                     ?.savedStateHandle
                     ?.get<StockingInfo>("stocking")
-
-                if (stocking != null) {
-                    TroutBuddyDialog(navController) { onBackClick ->
-                        StockingDetailScreen(
-                            stocking = stocking,
-                            onBackClick = onBackClick,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                }
+                    ?: throw IllegalArgumentException("No stocking data passed to detail screen")
+                StockingDetailScreen(
+                    stocking = stocking,
+                    onBackClick = onBackClick,
+                )
             }
 
             composable(NavigationRoutes.Settings.route) {
@@ -83,47 +78,55 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                 )
             }
 
-            dialog(
-                route = NavigationRoutes.DebugMenu.route,
-                dialogProperties = DialogProperties(
-                    usePlatformDefaultWidth = false,
-                    decorFitsSystemWindows = false,
-                ),
-            ) {
-                TroutBuddyDialog(navController) { onBackClick ->
-                    DebugMenuScreen(
-                        onBackClick = onBackClick
-                    )
-                }
+            fullscreenDialog(
+                navController = navController,
+                route = NavigationRoutes.DebugMenu.route
+            ) { onBackClick ->
+                DebugMenuScreen(
+                    onBackClick = onBackClick
+                )
             }
 
-            dialog(
+            fullscreenDialog(
+                navController = navController,
                 route = NavigationRoutes.About.route,
-                dialogProperties = DialogProperties(
-                    usePlatformDefaultWidth = false,
-                    decorFitsSystemWindows = false,
-                ),
-            ) {
-                TroutBuddyDialog(navController) { onBackClick ->
-                    AboutScreen(
-                        onBackClick = onBackClick
-                    )
-                }
+            ) { onBackClick ->
+                AboutScreen(
+                    onBackClick = onBackClick
+                )
             }
 
-            dialog(
+            fullscreenDialog(
+                navController = navController,
                 route = NavigationRoutes.Contributions.route,
-                dialogProperties = DialogProperties(
-                    usePlatformDefaultWidth = false,
-                    decorFitsSystemWindows = false,
-                ),
-            ) {
-                TroutBuddyDialog(navController) { onBackClick ->
-                    ContributionsScreen(
-                        onBackClick = onBackClick
-                    )
-                }
+            ) { onBackClick ->
+                ContributionsScreen(
+                    onBackClick = onBackClick
+                )
             }
         }
     }
+}
+
+private fun NavGraphBuilder.fullscreenDialog(
+    route: String,
+    navController: NavController,
+    arguments: List<NamedNavArgument> = emptyList(),
+    deepLinks: List<NavDeepLink> = emptyList(),
+    content: @Composable (onBackClick: () -> Unit) -> Unit
+) {
+    dialog(
+        route = route,
+        arguments = arguments,
+        deepLinks = deepLinks,
+        dialogProperties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false,
+        ),
+        content = {
+            TroutBuddyDialog(navController) { onBackClick ->
+                content(onBackClick)
+            }
+        },
+    )
 }
