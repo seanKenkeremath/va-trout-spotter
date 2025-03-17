@@ -1,5 +1,6 @@
 package com.seank.vatroutbuddy.ui.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Ease
 import androidx.compose.animation.core.EaseOut
@@ -58,6 +59,10 @@ fun TroutBuddyDialog(
             durationMillis = AppConfig.MODAL_CONTENT_ANIMATION_DURATION_IN * 2,
         )
     )
+
+    BackHandler(enabled = true) {
+        contentVisible = false
+    }
 
     Box {
         AnimatedVisibility(
