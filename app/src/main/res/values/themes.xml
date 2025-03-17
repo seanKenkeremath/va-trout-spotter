@@ -3,7 +3,7 @@
     <style name="Theme.VATroutBuddy" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">#0000</item>
         <item name="android:navigationBarColor">#0000</item>
-        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowLightStatusBar">@bool/light_status_bar</item>
     </style>
 

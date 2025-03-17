@@ -18,7 +18,13 @@ object AppConfig {
     const val BACKGROUND_FETCH_FREQUENCY_HOURS = 12L
 
     // Animations
-    const val MODAL_ANIMATION_DURATION = 300
+    // This should be longest or tied for longest among modal animation lengths
+    const val MODAL_CONTENT_ANIMATION_DURATION_IN = 500
+    const val MODAL_CONTENT_ANIMATION_DURATION_OUT = 300
+    const val MODAL_LOADING_ANIMATION_DURATION_IN = 300
+    // This should be longer than modal exit length or it will not be visible
+    const val MODAL_LOADING_ANIMATION_DURATION_OUT = 500
+    const val MODAL_ANIMATION_DELAY = 100
 
     // Nav
     const val ALLOW_COLLAPSIBLE_NAV = false
