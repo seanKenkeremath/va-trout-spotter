@@ -61,8 +61,8 @@ fun WavyLoadingIndicator(
     val gradientBrush = remember {
         Brush.linearGradient(
             colors = listOf(Color.Blue, Color.Cyan),
-            start = Offset(0f, 0f),
-            end = Offset(0f, Float.POSITIVE_INFINITY)
+            start = Offset(0f, Float.POSITIVE_INFINITY),
+            end = Offset(0f, 0f)
         )
     }
 
