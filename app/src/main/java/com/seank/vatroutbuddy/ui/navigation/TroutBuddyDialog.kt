@@ -84,7 +84,7 @@ fun TroutBuddyDialog(
         ) {
             WavyLoadingIndicator(
                 modifier = Modifier
-                    .alpha(.5f)
+                    .alpha(.3f)
                     .fillMaxSize()
                     .padding(top = 32.dp),
                 waveLength = 80.dp,
