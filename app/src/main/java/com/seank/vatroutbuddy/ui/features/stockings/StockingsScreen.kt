@@ -59,6 +59,10 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -100,52 +104,55 @@ fun StockingsScreen(
 
     Scaffold(
         topBar = {
-            if (showSearch) {
-                SearchBar(
-                    query = searchQuery,
-                    onQueryChange = { 
-                        searchQuery = it
-                        viewModel.updateSearchTerm(it)
-                    },
-                    onClose = { 
-                        showSearch = false
-                        searchQuery = ""
-                        viewModel.updateSearchTerm(null)
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            } else {
-                TopAppBar(
-                    title = { Text(stringResource(R.string.title_stockings)) },
-                    colors = topAppBarColors,
-                    actions = {
+            TopAppBar(
+                title = { 
+                    if (showSearch) {
+                        SearchBar(
+                            query = searchQuery,
+                            onQueryChange = { 
+                                searchQuery = it
+                                viewModel.updateSearchTerm(it)
+                            },
+                            onClose = { 
+                                showSearch = false
+                                searchQuery = ""
+                                viewModel.updateSearchTerm(null)
+                            }
+                        )
+                    } else {
+                        Text(stringResource(R.string.title_stockings))
+                    }
+                },
+                colors = topAppBarColors,
+                actions = {
+                    if (!showSearch) {
                         IconButton(onClick = { showSearch = true }) {
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = stringResource(R.string.search_hint)
                             )
                         }
-                        BadgedBox(
-                            badge = {
-                                if (filters.activeFilterCount > 0) {
-                                    Badge(modifier = Modifier.offset(x = (-8).dp, y = 8.dp)) {
-                                        Text(filters.activeFilterCount.toString())
-                                    }
+                    }
+                    BadgedBox(
+                        badge = {
+                            if (filters.activeFilterCount > 0) {
+                                Badge(modifier = Modifier.offset(x = (-8).dp, y = 8.dp)) {
+                                    Text(filters.activeFilterCount.toString())
                                 }
-                            },
-                        ) {
-                            IconButton(onClick = { showFilters = true }) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_filter_black_24dp),
-                                    contentDescription = "Filters"
-                                )
                             }
+                        },
+                    ) {
+                        IconButton(onClick = { showFilters = true }) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_filter_black_24dp),
+                                contentDescription = "Filters"
+                            )
                         }
-                    },
-                    scrollBehavior = topBarScrollBehavior,
-                    windowInsets = WindowInsets(0.dp),
-                )
-            }
+                    }
+                },
+                scrollBehavior = topBarScrollBehavior,
+                windowInsets = WindowInsets(0.dp),
+            )
         },
         // We have consumed the bottom padding for the nav bar in the parent scaffold
         contentWindowInsets = WindowInsets(0.dp),
@@ -279,53 +286,68 @@ private fun SearchBar(
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+    
+    LaunchedEffect(query) {
+        if (query.isEmpty()) {
+            keyboardController?.show()
+        }
+    }
+    
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        IconButton(
+            onClick = { 
+                keyboardController?.hide()
+                focusManager.clearFocus()
+                onClose() 
+            }
         ) {
-            IconButton(onClick = onClose) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
-                )
-            }
-            BasicTextField(
-                value = query,
-                onValueChange = onQueryChange,
-                textStyle = TextStyle(
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontSize = 16.sp
-                ),
-                singleLine = true,
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.onPrimary),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 8.dp)
-            ) { innerTextField ->
-                Box {
-                    if (query.isEmpty()) {
-                        Text(
-                            text = stringResource(R.string.search_hint),
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
-                        )
-                    }
-                    innerTextField()
-                }
-            }
-            if (query.isNotEmpty()) {
-                IconButton(onClick = { onQueryChange("") }) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = "Clear"
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        BasicTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            textStyle = TextStyle(
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 16.sp
+            ),
+            singleLine = true,
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            modifier = Modifier
+                .weight(1f)
+                .focusRequester(focusRequester)
+        ) { innerTextField ->
+            Box {
+                if (query.isEmpty()) {
+                    Text(
+                        text = stringResource(R.string.search_hint),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
+                innerTextField()
+            }
+        }
+        if (query.isNotEmpty()) {
+            IconButton(onClick = { onQueryChange("") }) {
+                Icon(
+                    imageVector = Icons.Default.Clear,
+                    contentDescription = "Clear",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

@@ -13,6 +13,5 @@ data class StockingFilters(
             isHeritageDayWater != null,
             isNsf != null,
             isDelayedHarvest != null,
-            !searchTerm.isNullOrBlank()
         ).count { it }
 } 
