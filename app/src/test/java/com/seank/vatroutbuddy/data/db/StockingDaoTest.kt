@@ -202,6 +202,120 @@ class StockingDaoTest {
         assertEquals("County A", result[0].county)
     }
 
+    @Test
+    fun `getMostRecentStockings filters by waterbody search term`() = runBlocking {
+        val stockings = listOf(
+            createStocking(1, LocalDate.now(), "Trout Creek", "Bedford County"),
+            createStocking(2, LocalDate.now(), "Smith River", "Patrick County"),
+            createStocking(3, LocalDate.now(), "Big Stony Creek", "Giles County"),
+            createStocking(4, LocalDate.now(), "Little Stony Creek", "Scott County")
+        )
+        stockingDao.insertStockings(stockings)
+
+        val result = stockingDao.getMostRecentStockings(
+            searchTerm = "stony",
+            limit = 10
+        )
+
+        assertEquals(2, result.size)
+        assertTrue(result.any { it.waterbody == "Big Stony Creek" })
+        assertTrue(result.any { it.waterbody == "Little Stony Creek" })
+    }
+
+    @Test
+    fun `getMostRecentStockings filters by county search term`() = runBlocking {
+        val stockings = listOf(
+            createStocking(1, LocalDate.now(), "Trout Creek", "Bedford County"),
+            createStocking(2, LocalDate.now(), "Smith River", "Patrick County"),
+            createStocking(3, LocalDate.now(), "Big Stony Creek", "Giles County"),
+            createStocking(4, LocalDate.now(), "Little Stony Creek", "Scott County")
+        )
+        stockingDao.insertStockings(stockings)
+
+        val result = stockingDao.getMostRecentStockings(
+            searchTerm = "patrick",
+            limit = 10
+        )
+
+        assertEquals(1, result.size)
+        assertEquals("Patrick County", result[0].county)
+    }
+
+    @Test
+    fun `search is case insensitive`() = runBlocking {
+        val stockings = listOf(
+            createStocking(1, LocalDate.now(), "UPPER CASE Creek", "Bedford County"),
+            createStocking(2, LocalDate.now(), "lower case river", "Patrick County"),
+            createStocking(3, LocalDate.now(), "Mixed Case Creek", "Giles County")
+        )
+        stockingDao.insertStockings(stockings)
+
+        val result = stockingDao.getMostRecentStockings(
+            searchTerm = "case",
+            limit = 10
+        )
+
+        assertEquals(3, result.size)
+        assertTrue(result.any { it.waterbody == "UPPER CASE Creek" })
+        assertTrue(result.any { it.waterbody == "lower case river" })
+        assertTrue(result.any { it.waterbody == "Mixed Case Creek" })
+    }
+
+    @Test
+    fun `search works with other filters`() = runBlocking {
+        val stockings = listOf(
+            createStocking(1, LocalDate.now(), "Trout Creek", isNationalForest = true),
+            createStocking(2, LocalDate.now(), "Smith River", isNationalForest = false),
+            createStocking(3, LocalDate.now(), "Big Stony Creek", isNationalForest = true),
+            createStocking(4, LocalDate.now(), "Little Stony Creek", isNationalForest = false)
+        )
+        stockingDao.insertStockings(stockings)
+
+        val result = stockingDao.getMostRecentStockings(
+            searchTerm = "creek",
+            isNationalForest = true,
+            limit = 10
+        )
+
+        assertEquals(2, result.size)
+        assertTrue(result.all { it.isNationalForest })
+        assertTrue(result.all { it.waterbody.contains("Creek", ignoreCase = true) })
+    }
+
+    @Test
+    fun `search works with paging`() = runBlocking {
+        val today = LocalDate.now()
+        val stockings = (1..20).map { i ->
+            createStocking(
+                id = i,
+                date = today.minusDays(i.toLong()),
+                waterbody = "Creek $i"
+            )
+        }
+        stockingDao.insertStockings(stockings)
+
+        // Get first page
+        val firstPage = stockingDao.getMostRecentStockings(
+            searchTerm = "creek",
+            limit = 5
+        )
+        
+        assertEquals(5, firstPage.size)
+        
+        // Get second page
+        val lastItem = firstPage.last()
+        val secondPage = stockingDao.getStockingsPaged(
+            lastDate = lastItem.date,
+            lastWaterbody = lastItem.waterbody,
+            lastId = lastItem.id,
+            searchTerm = "creek",
+            pageSize = 5
+        )
+        
+        assertEquals(5, secondPage.size)
+        assertTrue(secondPage.none { it.id in firstPage.map { it.id } })
+    }
+
     private fun createStocking(
         id: Int,
         date: LocalDate,
