@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,6 +50,15 @@ import com.seank.vatroutbuddy.AppConfig
 import com.seank.vatroutbuddy.R
 import com.seank.vatroutbuddy.domain.model.StockingInfo
 import java.time.format.DateTimeFormatter
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -63,6 +73,8 @@ fun StockingsScreen(
     val filters by viewModel.filters.collectAsState()
     val availableCounties by viewModel.availableCounties.collectAsState()
     var showFilters by remember { mutableStateOf(false) }
+    var showSearch by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val canScroll by remember { derivedStateOf { listState.canScrollForward || listState.canScrollBackward } }
     val topAppBarState = rememberTopAppBarState()
@@ -88,31 +100,52 @@ fun StockingsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.title_stockings)) },
-                colors = topAppBarColors,
-                actions = {
-                    BadgedBox(
-                        badge = {
-                            if (filters.activeFilterCount > 0) {
-                                Badge(modifier = Modifier.offset(x = (-8).dp, y = 8.dp)) {
-                                    Text(filters.activeFilterCount.toString())
-                                }
-                            }
-                        },
-                    ) {
-                        IconButton(onClick = { showFilters = true }) {
+            if (showSearch) {
+                SearchBar(
+                    query = searchQuery,
+                    onQueryChange = { 
+                        searchQuery = it
+                        viewModel.updateSearchTerm(it)
+                    },
+                    onClose = { 
+                        showSearch = false
+                        searchQuery = ""
+                        viewModel.updateSearchTerm(null)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.title_stockings)) },
+                    colors = topAppBarColors,
+                    actions = {
+                        IconButton(onClick = { showSearch = true }) {
                             Icon(
-                                painter = painterResource(R.drawable.ic_filter_black_24dp),
-                                contentDescription = "Filters"
+                                imageVector = Icons.Default.Search,
+                                contentDescription = stringResource(R.string.search_hint)
                             )
                         }
-                    }
-                },
-                scrollBehavior = topBarScrollBehavior,
-                // We have already consumed the top system bar insets
-                windowInsets = WindowInsets(0.dp),
-            )
+                        BadgedBox(
+                            badge = {
+                                if (filters.activeFilterCount > 0) {
+                                    Badge(modifier = Modifier.offset(x = (-8).dp, y = 8.dp)) {
+                                        Text(filters.activeFilterCount.toString())
+                                    }
+                                }
+                            },
+                        ) {
+                            IconButton(onClick = { showFilters = true }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_filter_black_24dp),
+                                    contentDescription = "Filters"
+                                )
+                            }
+                        }
+                    },
+                    scrollBehavior = topBarScrollBehavior,
+                    windowInsets = WindowInsets(0.dp),
+                )
+            }
         },
         // We have consumed the bottom padding for the nav bar in the parent scaffold
         contentWindowInsets = WindowInsets(0.dp),
@@ -235,6 +268,65 @@ private fun StockingItem(
                 text = "Species: ${stocking.species.joinToString(", ")}",
                 style = MaterialTheme.typography.bodyMedium
             )
+        }
+    }
+}
+
+@Composable
+private fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onClose) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+            BasicTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                textStyle = TextStyle(
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontSize = 16.sp
+                ),
+                singleLine = true,
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.onPrimary),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp)
+            ) { innerTextField ->
+                Box {
+                    if (query.isEmpty()) {
+                        Text(
+                            text = stringResource(R.string.search_hint),
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
+                        )
+                    }
+                    innerTextField()
+                }
+            }
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onQueryChange("") }) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = "Clear"
+                    )
+                }
+            }
         }
     }
 } 

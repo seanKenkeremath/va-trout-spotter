@@ -4,6 +4,7 @@ data class StockingFilters(
     val isHeritageDayWater: Boolean? = null,
     val isNsf: Boolean? = null,
     val isDelayedHarvest: Boolean? = null,
+    val searchTerm: String? = null,
 ) {
     val activeFilterCount: Int
         get() = listOf(
@@ -11,6 +12,7 @@ data class StockingFilters(
             isNationalForest != null,
             isHeritageDayWater != null,
             isNsf != null,
-            isDelayedHarvest != null
+            isDelayedHarvest != null,
+            !searchTerm.isNullOrBlank()
         ).count { it }
 } 

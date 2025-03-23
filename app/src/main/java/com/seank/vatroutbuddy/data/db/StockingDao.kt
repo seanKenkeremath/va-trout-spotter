@@ -38,6 +38,9 @@ interface StockingDao {
     AND (:isHeritageDayWater IS NULL OR isHeritageDayWater = :isHeritageDayWater)
     AND (:isNsf IS NULL OR isNsf = :isNsf)
     AND (:isDelayedHarvest IS NULL OR isDelayedHarvest = :isDelayedHarvest)
+    AND (:searchTerm IS NULL OR 
+         LOWER(waterbody) LIKE '%' || LOWER(:searchTerm) || '%' OR 
+         LOWER(county) LIKE '%' || LOWER(:searchTerm) || '%')
     ORDER BY date DESC, waterbody, id
     LIMIT :limit
 """)
@@ -47,6 +50,7 @@ interface StockingDao {
         isHeritageDayWater: Boolean? = null,
         isNsf: Boolean? = null,
         isDelayedHarvest: Boolean? = null,
+        searchTerm: String? = null,
         limit: Int
     ): List<StockingEntity>
 
@@ -57,6 +61,9 @@ interface StockingDao {
     AND (:isHeritageDayWater IS NULL OR isHeritageDayWater = :isHeritageDayWater)
     AND (:isNsf IS NULL OR isNsf = :isNsf)
     AND (:isDelayedHarvest IS NULL OR isDelayedHarvest = :isDelayedHarvest)
+    AND (:searchTerm IS NULL OR 
+         LOWER(waterbody) LIKE '%' || LOWER(:searchTerm) || '%' OR 
+         LOWER(county) LIKE '%' || LOWER(:searchTerm) || '%')
     AND (
         (date < :lastDate)
         OR (date = :lastDate AND waterbody > :lastWaterbody)
@@ -74,6 +81,7 @@ interface StockingDao {
         isHeritageDayWater: Boolean? = null,
         isNsf: Boolean? = null,
         isDelayedHarvest: Boolean? = null,
+        searchTerm: String? = null,
         pageSize: Int
     ): List<StockingEntity>
 

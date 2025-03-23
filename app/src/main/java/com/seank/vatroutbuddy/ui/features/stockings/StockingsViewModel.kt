@@ -175,6 +175,12 @@ class StockingsViewModel @Inject constructor(
     fun clearFilters() {
         updateFilters(StockingFilters())
     }
+
+    fun updateSearchTerm(searchTerm: String?) {
+        val currentFilters = _filters.value
+        val newFilters = currentFilters.copy(searchTerm = searchTerm?.takeIf { it.isNotBlank() })
+        updateFilters(newFilters)
+    }
 }
 
 sealed class HomeUiState {

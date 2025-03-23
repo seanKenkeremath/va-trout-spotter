@@ -82,7 +82,8 @@ class StockingRepository @Inject constructor(
                     isNationalForest = stockingFilters?.isNationalForest,
                     isHeritageDayWater = stockingFilters?.isHeritageDayWater,
                     isNsf = stockingFilters?.isNsf,
-                    isDelayedHarvest = stockingFilters?.isDelayedHarvest
+                    isDelayedHarvest = stockingFilters?.isDelayedHarvest,
+                    searchTerm = stockingFilters?.searchTerm
                 )
                 val hasMore = stockings.size > pageSize
                 val pageStockings = stockings.take(pageSize)
@@ -119,7 +120,8 @@ class StockingRepository @Inject constructor(
                 isNationalForest = stockingFilters?.isNationalForest,
                 isHeritageDayWater = stockingFilters?.isHeritageDayWater,
                 isNsf = stockingFilters?.isNsf,
-                isDelayedHarvest = stockingFilters?.isDelayedHarvest
+                isDelayedHarvest = stockingFilters?.isDelayedHarvest,
+                searchTerm = stockingFilters?.searchTerm
             )
             val hasMore = stockings.size > pageSize
             val pageStockings = stockings.take(pageSize)
