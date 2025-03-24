@@ -13,6 +13,8 @@
     <string name="waterbody_county_label">County</string>
     <string name="waterbody_category_label">Category</string>
     <string name="waterbody_is_national_forest_water">National Forest Water</string>
+    <string name="waterbody_recent_stockings_format">Recent stockings at %s</string>
+    <string name="waterbody_recent_stockings_empty">No recent stockings at this location</string>
 
     <!-- Notifications Screen -->
     <string name="notifications_county_section_title">County Notifications</string>

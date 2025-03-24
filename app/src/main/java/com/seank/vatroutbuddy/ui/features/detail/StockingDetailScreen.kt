@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -128,7 +128,7 @@ private fun StockingDetailContent(
             StockingDetailCard(stocking = stocking)
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Recent Stockings at ${stocking.waterbody}",
+                text = stringResource(R.string.waterbody_recent_stockings_format, stocking.waterbody),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -138,15 +138,17 @@ private fun StockingDetailContent(
         if (relatedStockings.isEmpty()) {
             item {
                 Text(
-                    text = "No other recent stockings found for this waterbody.",
+                    text = stringResource(R.string.waterbody_recent_stockings_empty),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         } else {
-            items(relatedStockings) { relatedStocking ->
+            itemsIndexed(relatedStockings) { index, relatedStocking ->
                 RelatedStockingItem(stocking = relatedStocking)
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                if (index != relatedStockings.size -1) {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                }
             }
         }
     }
