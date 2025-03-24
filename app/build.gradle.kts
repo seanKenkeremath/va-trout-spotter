@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.seank.vatroutbuddy"
+    namespace = "com.kenkeremath.vatroutbuddy"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.seank.vatroutbuddy"
+        applicationId = "com.kenkeremath.vatroutbuddy"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
