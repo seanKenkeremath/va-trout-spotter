@@ -28,9 +28,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FilterBottomSheet(
     filters: StockingFilters,
-    availableCounties: List<String>,
     onFiltersChanged: (StockingFilters) -> Unit,
-    onClearFilters: () -> Unit,
     onDismiss: () -> Unit
 ) {
     ModalBottomSheet(
@@ -48,7 +46,6 @@ fun FilterBottomSheet(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Boolean filters
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -151,45 +148,6 @@ fun FilterBottomSheet(
                     )
                 }
             }
-
-            // Counties
-            Text(
-                text = "Counties",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                availableCounties.forEach { county ->
-                    FilterChip(
-                        selected = county in filters.counties,
-                        onClick = {
-                            val newCounties = filters.counties.toMutableSet()
-                            if (county in newCounties) {
-                                newCounties.remove(county)
-                            } else {
-                                newCounties.add(county)
-                            }
-                            onFiltersChanged(filters.copy(counties = newCounties))
-                        },
-                        label = { Text(county) }
-                    )
-                }
-            }
-
-            // Clear filters button
-            TextButton(
-                onClick = onClearFilters,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-            ) {
-                Text("Clear All Filters")
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
