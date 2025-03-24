@@ -17,6 +17,8 @@ composeCompiler = "1.5.8"
 hilt = "2.51.1"
 hiltNavigationCompose = "1.2.0"
 jsoup = "1.17.2"
+ossLicensesPlugin = "0.10.6"
+playServicesOssLicenses = "17.1.0"
 room = "2.6.1"
 work = "2.9.0"
 mockk = "1.13.9"
@@ -61,6 +63,8 @@ androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", vers
 
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 
+oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
+play-services-oss-licenses = { module = "com.google.android.gms:play-services-oss-licenses", version.ref = "playServicesOssLicenses" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }

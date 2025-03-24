@@ -4,6 +4,7 @@ plugins {
     id("com.google.devtools.ksp")
     alias(libs.plugins.hilt)
     id("kotlin-parcelize")
+    id("com.google.android.gms.oss-licenses-plugin")
 }
 
 android {
@@ -111,4 +112,6 @@ dependencies {
     androidTestImplementation(libs.androidx.room.testing)
 
     implementation(libs.androidx.datastore.preferences)
+
+    implementation(libs.play.services.oss.licenses)
 }

@@ -27,7 +27,7 @@ import com.seank.vatroutbuddy.R
 fun SettingsScreen(
     onDebugMenuClick: () -> Unit,
     onAboutClick: () -> Unit,
-    onContributionsClick: () -> Unit,
+    onAcknowledgementsClick: () -> Unit,
     modifier: Modifier = Modifier,
     collapsibleToolbar: Boolean = false
 ) {
@@ -73,10 +73,9 @@ fun SettingsScreen(
             )
             HorizontalDivider()
 
-            // Contributions
             ListItem(
-                headlineContent = { Text(stringResource(R.string.settings_contributions)) },
-                modifier = Modifier.clickable { onContributionsClick() }
+                headlineContent = { Text(stringResource(R.string.settings_acknowledgements)) },
+                modifier = Modifier.clickable { onAcknowledgementsClick() }
             )
             HorizontalDivider()
 

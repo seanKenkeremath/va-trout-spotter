@@ -1,9 +1,11 @@
 package com.seank.vatroutbuddy.ui.navigation
 
+import android.content.Intent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
@@ -13,12 +15,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.seank.vatroutbuddy.AppConfig
+import com.seank.vatroutbuddy.R
 import com.seank.vatroutbuddy.domain.model.StockingInfo
 import com.seank.vatroutbuddy.ui.features.detail.StockingDetailScreen
 import com.seank.vatroutbuddy.ui.features.notifications.NotificationsScreen
 import com.seank.vatroutbuddy.ui.features.settings.AboutScreen
-import com.seank.vatroutbuddy.ui.features.settings.ContributionsScreen
 import com.seank.vatroutbuddy.ui.features.settings.DebugMenuScreen
 import com.seank.vatroutbuddy.ui.features.settings.SettingsScreen
 import com.seank.vatroutbuddy.ui.features.stockings.StockingsScreen
@@ -73,7 +76,12 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                 SettingsScreen(
                     onDebugMenuClick = { navController.navigate(NavigationRoutes.DebugMenu.route) },
                     onAboutClick = { navController.navigate(NavigationRoutes.About.route) },
-                    onContributionsClick = { navController.navigate(NavigationRoutes.Contributions.route) },
+                    onAcknowledgementsClick = {
+                        val context = navController.context
+                        val intent = Intent(context, OssLicensesMenuActivity::class.java)
+                        OssLicensesMenuActivity.setActivityTitle(context.getString(R.string.title_acknowledgements))
+                        context.startActivity(intent)
+                    },
                     collapsibleToolbar = collapsibleNav,
                 )
             }
@@ -92,15 +100,6 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                 route = NavigationRoutes.About.route,
             ) { onBackClick ->
                 AboutScreen(
-                    onBackClick = onBackClick
-                )
-            }
-
-            fullscreenDialog(
-                navController = navController,
-                route = NavigationRoutes.Contributions.route,
-            ) { onBackClick ->
-                ContributionsScreen(
                     onBackClick = onBackClick
                 )
             }
