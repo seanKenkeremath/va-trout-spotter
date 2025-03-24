@@ -1,18 +1,23 @@
 package com.seank.vatroutbuddy.ui.features.stockings
 
 import StockingFilters
+import com.seank.vatroutbuddy.AppConfig
 import com.seank.vatroutbuddy.data.repository.StockingRepository
 import com.seank.vatroutbuddy.domain.model.StockingInfo
 import com.seank.vatroutbuddy.domain.model.StockingsListPage
 import com.seank.vatroutbuddy.domain.usecase.FetchAndNotifyStockingsUseCase
+import com.seank.vatroutbuddy.util.Clock
 import com.seank.vatroutbuddy.util.TestFactory
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -33,6 +38,7 @@ class StockingsViewModelTest {
     private lateinit var viewModel: StockingsViewModel
     private lateinit var repository: StockingRepository
     private lateinit var fetchAndNotifyStockingsUseCase: FetchAndNotifyStockingsUseCase
+    private lateinit var clock: Clock
     private val testDispatcher = StandardTestDispatcher()
     private val hasInitialDataFlow = MutableStateFlow(false)
     private val hasHistoricalDataFlow = MutableStateFlow(false)
@@ -42,8 +48,19 @@ class StockingsViewModelTest {
         Dispatchers.setMain(testDispatcher)
         repository = mockk(relaxed = true)
         fetchAndNotifyStockingsUseCase = mockk(relaxed = true)
+        clock = mockk()
         coEvery { repository.hasHistoricalData } returns hasHistoricalDataFlow
         coEvery { repository.hasInitialData } returns hasInitialDataFlow
+        
+        // Setup default responses
+        coEvery { repository.loadSavedStockings(any(), any()) } returns Result.success(
+            StockingsListPage(emptyList(), false)
+        )
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.success(emptyList())
+        coEvery { repository.getAllCounties() } returns emptyList()
+        
+        // Setup clock with initial time
+        every { clock.currentTimeMillis() } returns 1000L
     }
 
     @After
@@ -491,8 +508,46 @@ class StockingsViewModelTest {
         assertTrue(updatedState.stockings.all { it.county == "Filtered County" })
     }
 
+    @Test
+    fun `refreshStockings respects throttle time`() = runTest {
+        every { clock.currentTimeMillis() } returns 1000L
+        
+        viewModel = StockingsViewModel(
+            repository,
+            fetchAndNotifyStockingsUseCase,
+            testDispatcher,
+            clock
+        )
+        
+        // Initial refresh should work
+        viewModel.refreshStockings()
+        advanceUntilIdle()
+        
+        // Verify the fetch was called
+        coVerify(exactly = 1) { fetchAndNotifyStockingsUseCase.execute() }
+        
+        // Set current time to be within throttle window
+        every { clock.currentTimeMillis() } returns 2000L  // 1 second later
+        
+        viewModel.refreshStockings()
+        advanceUntilIdle()
+        
+        // Verify fetch was not called again
+        coVerify(exactly = 1) { fetchAndNotifyStockingsUseCase.execute() }
+        
+        // set time beyond throttle window
+        every { clock.currentTimeMillis() } returns 1000L + AppConfig.REFRESH_THROTTLE_MILLIS + 1000L
+        
+        // This should work
+        viewModel.refreshStockings()
+        advanceUntilIdle()
+        
+        // Verify fetch was called again
+        coVerify(exactly = 2) { fetchAndNotifyStockingsUseCase.execute() }
+    }
+
     private fun createViewModel() {
-        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase, testDispatcher)
+        viewModel = StockingsViewModel(repository, fetchAndNotifyStockingsUseCase, testDispatcher, clock)
     }
 
     private fun createMockStockings(count: Int, startId: Int = 1, county: String? = null): List<StockingInfo> {

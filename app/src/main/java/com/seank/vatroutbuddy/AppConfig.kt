@@ -31,4 +31,9 @@ object AppConfig {
 
     // Nav
     const val ALLOW_COLLAPSIBLE_NAV = false
+
+    // Pull to refresh throttling
+    const val REFRESH_THROTTLE_MILLIS = 120000L
+    // Default refresh animation duration when throttled
+    const val REFRESH_THROTTLE_DELAY_MILLIS = 1500L
 } 

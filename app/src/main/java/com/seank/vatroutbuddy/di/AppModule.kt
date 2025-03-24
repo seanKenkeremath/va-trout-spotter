@@ -5,12 +5,13 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
-import androidx.work.WorkManager
 import com.seank.vatroutbuddy.data.db.AppDatabase
 import com.seank.vatroutbuddy.data.db.StockingDao
 import com.seank.vatroutbuddy.data.db.NotificationSubscriptionDao
 import com.seank.vatroutbuddy.permissions.AndroidPermissionsManager
 import com.seank.vatroutbuddy.permissions.PermissionsManager
+import com.seank.vatroutbuddy.util.Clock
+import com.seank.vatroutbuddy.util.DefaultClock
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,7 +37,11 @@ annotation class MainDispatcher
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-    
+
+    @Provides
+    @Singleton
+    fun provideClock(): Clock = DefaultClock()
+
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {

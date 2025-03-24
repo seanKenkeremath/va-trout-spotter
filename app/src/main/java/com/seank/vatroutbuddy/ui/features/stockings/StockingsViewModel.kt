@@ -10,18 +10,22 @@ import com.seank.vatroutbuddy.domain.model.StockingInfo
 import com.seank.vatroutbuddy.domain.usecase.FetchAndNotifyStockingsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.TreeSet
 import javax.inject.Inject
+import com.seank.vatroutbuddy.util.Clock
+import com.seank.vatroutbuddy.util.DefaultClock
 
 @HiltViewModel
 class StockingsViewModel @Inject constructor(
     private val stockingRepository: StockingRepository,
     private val fetchAndNotifyStockingsUseCase: FetchAndNotifyStockingsUseCase,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val clock: Clock = DefaultClock(),
 ) : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing = _isRefreshing.asStateFlow()
@@ -38,6 +42,8 @@ class StockingsViewModel @Inject constructor(
     // TODO: centralize comparison logic
     private val allStockings = TreeSet<StockingInfo>(compareByDescending<StockingInfo?> { it?.date }
         .thenBy { it?.waterbody }.thenBy { it?.id })
+
+    private var lastRefreshTime: Long = 0
 
     init {
         initialize()
@@ -59,6 +65,9 @@ class StockingsViewModel @Inject constructor(
     }
 
     private suspend fun fetchNewStockings() {
+        // Update last refresh time
+        lastRefreshTime = clock.currentTimeMillis()
+        
         // Fetch latest data
         val result = fetchAndNotifyStockingsUseCase.execute()
         val stockings = result.getOrNull()
@@ -186,6 +195,18 @@ class StockingsViewModel @Inject constructor(
 
     fun refreshStockings() {
         viewModelScope.launch {
+            val currentTime = clock.currentTimeMillis()
+            val timeSinceLastRefresh = currentTime - lastRefreshTime
+            
+            if (timeSinceLastRefresh < AppConfig.REFRESH_THROTTLE_MILLIS) {
+                // If we're trying to refresh too soon, just show the refreshing indicator briefly
+                _isRefreshing.value = true
+                delay(AppConfig.REFRESH_THROTTLE_DELAY_MILLIS)
+                _isRefreshing.value = false
+                return@launch
+            }
+            
+            // Proceed with actual refresh
             _isRefreshing.value = true
             fetchNewStockings()
             _isRefreshing.value = false
