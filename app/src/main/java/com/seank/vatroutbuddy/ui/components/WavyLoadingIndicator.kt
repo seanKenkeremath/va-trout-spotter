@@ -44,7 +44,7 @@ private fun Int.pi() = this * PI
 fun WavyLoadingIndicator(
     modifier: Modifier = Modifier,
     crestHeight: Dp = 4.dp,
-    waveLength: Dp = 32.dp,
+    waveLength: Dp = 80.dp,
     centerWave: Boolean = false
 ) {
     val infiniteTransition = rememberInfiniteTransition()
