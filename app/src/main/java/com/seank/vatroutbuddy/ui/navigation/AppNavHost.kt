@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
@@ -25,6 +24,7 @@ import com.seank.vatroutbuddy.ui.features.settings.AboutScreen
 import com.seank.vatroutbuddy.ui.features.settings.DebugMenuScreen
 import com.seank.vatroutbuddy.ui.features.settings.SettingsScreen
 import com.seank.vatroutbuddy.ui.features.stockings.StockingsScreen
+import com.seank.vatroutbuddy.ui.features.notifications.EditNotificationsScreen
 
 @Composable
 fun AppNavHost(modifier: Modifier = Modifier) {
@@ -55,7 +55,18 @@ fun AppNavHost(modifier: Modifier = Modifier) {
             }
 
             composable(NavigationRoutes.Notifications.route) {
-                NotificationsScreen(collapsibleToolbar = collapsibleNav)
+                NotificationsScreen(onEditNotificationsClicked = {
+                    navController.navigate(NavigationRoutes.EditNotifications.route)
+                })
+            }
+
+            fullscreenDialog(
+                route = NavigationRoutes.EditNotifications.route,
+                navController = navController,
+            ) { onBackClick ->
+                EditNotificationsScreen(
+                    onBackClick = onBackClick
+                )
             }
 
             fullscreenDialog(

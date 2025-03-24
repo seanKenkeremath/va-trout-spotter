@@ -17,12 +17,14 @@
     <!-- Notifications Screen -->
     <string name="notifications_county_section_title">County Notifications</string>
     <string name="notifications_waterbody_section_title">Stocking Area Notifications</string>
-    <string name="notifications_edit_button">EDIT</string>
+    <string name="notifications_edit_button">Edit</string>
     <string name="notifications_remove_button">Remove notification</string>
-    <string name="notifications_done_button">Done</string>
-    <string name="notifications_select_counties_title">Select Counties</string>
-    <string name="notifications_select_waterbodies_title">Select Location</string>
-    
+    <string name="edit_notifications_title">Edit notifications</string>
+    <string name="notifications_tab_counties">Counties</string>
+    <string name="notifications_tab_waterbodies">Stocking areas</string>
+    <string name="counties_search_hint">Search by county name…</string>
+    <string name="waterbodies_search_hint">Search by stocking area…</string>
+
     <!-- Notifications Permission Screen -->
     <string name="notifications_permission_title">Enable Notifications</string>
     <string name="notifications_permission_description">Get notified when your favorite waters are stocked with trout</string>
