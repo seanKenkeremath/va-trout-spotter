@@ -102,7 +102,7 @@ class StockingsViewModelTest {
     }
 
     @Test
-    fun `isRefreshing is true during fetch with saved data and false after completion`() = runTest {
+    fun `isRefreshing is true during refresh with saved data and false after completion`() = runTest {
         val mockStockings = createMockStockings(5)
         val mockPage = StockingsListPage(mockStockings, true)
 
@@ -120,8 +120,13 @@ class StockingsViewModelTest {
         hasInitialDataFlow.value = true
 
         createViewModel()
+        // Advance time to complete loading
+        advanceUntilIdle()
+        assertFalse(viewModel.isRefreshing.value)
 
-        // isRefreshing should be true during load
+        viewModel.refreshStockings()
+
+        // isRefreshing should be true during refresh
         advanceTimeBy(250L)
         assertTrue(viewModel.isRefreshing.value)
 

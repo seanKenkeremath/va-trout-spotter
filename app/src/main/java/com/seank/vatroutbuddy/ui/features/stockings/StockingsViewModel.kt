@@ -3,19 +3,19 @@ package com.seank.vatroutbuddy.ui.features.stockings
 import StockingFilters
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.seank.vatroutbuddy.data.repository.StockingRepository
-import com.seank.vatroutbuddy.domain.model.StockingInfo
 import com.seank.vatroutbuddy.AppConfig
+import com.seank.vatroutbuddy.data.repository.StockingRepository
 import com.seank.vatroutbuddy.di.IoDispatcher
+import com.seank.vatroutbuddy.domain.model.StockingInfo
+import com.seank.vatroutbuddy.domain.usecase.FetchAndNotifyStockingsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.TreeSet
 import javax.inject.Inject
-import com.seank.vatroutbuddy.domain.usecase.FetchAndNotifyStockingsUseCase
-import kotlinx.coroutines.CoroutineDispatcher
 
 @HiltViewModel
 class StockingsViewModel @Inject constructor(
@@ -50,28 +50,30 @@ class StockingsViewModel @Inject constructor(
             if (hasInitialData) {
                 loadSavedStockings()
                 loadFilterOptions()
-                _isRefreshing.value = true
             } else {
                 _uiState.value = HomeUiState.LoadingInitialData
             }
 
-            // Fetch latest data
-            val result = fetchAndNotifyStockingsUseCase.execute()
-            _isRefreshing.value = false
-            val stockings = result.getOrNull()
-            if (stockings == null) {
-                // TODO: error handling
-                _uiState.value = HomeUiState.Error(result.exceptionOrNull()?.message ?: "Error")
-                return@launch
-            }
-            loadFilterOptions()
-            allStockings.addAll(stockings)
-            if (_filters.value == StockingFilters()) {
-                // Only update state with empty filters otherwise we might show invalid data
-                _uiState.value = HomeUiState.Success(
-                    stockings = allStockings.toList()
-                )
-            }
+            fetchNewStockings()
+        }
+    }
+
+    private suspend fun fetchNewStockings() {
+        // Fetch latest data
+        val result = fetchAndNotifyStockingsUseCase.execute()
+        val stockings = result.getOrNull()
+        if (stockings == null) {
+            // TODO: error handling
+            _uiState.value = HomeUiState.Error(result.exceptionOrNull()?.message ?: "Error")
+            return
+        }
+        loadFilterOptions()
+        allStockings.addAll(stockings)
+        if (_filters.value == StockingFilters()) {
+            // Only update state with empty filters otherwise we might show invalid data
+            _uiState.value = HomeUiState.Success(
+                stockings = allStockings.toList()
+            )
         }
     }
 
@@ -180,6 +182,14 @@ class StockingsViewModel @Inject constructor(
         val currentFilters = _filters.value
         val newFilters = currentFilters.copy(searchTerm = searchTerm?.takeIf { it.isNotBlank() })
         updateFilters(newFilters)
+    }
+
+    fun refreshStockings() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            fetchNewStockings()
+            _isRefreshing.value = false
+        }
     }
 }
 

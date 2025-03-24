@@ -33,6 +33,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,7 +50,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -61,6 +66,8 @@ import com.seank.vatroutbuddy.AppConfig
 import com.seank.vatroutbuddy.R
 import com.seank.vatroutbuddy.domain.model.StockingInfo
 import java.time.format.DateTimeFormatter
+import com.seank.vatroutbuddy.ui.components.WavyLoadingIndicator
+import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,6 +80,7 @@ fun StockingsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val pagingState by viewModel.pagingState.collectAsState()
     val filters by viewModel.filters.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
     var showFilters by remember { mutableStateOf(false) }
     var showSearch by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
@@ -98,19 +106,20 @@ fun StockingsScreen(
             }
         }
     }
+    val pullRefreshState = rememberPullToRefreshState()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     if (showSearch) {
                         SearchBar(
                             query = searchQuery,
-                            onQueryChange = { 
+                            onQueryChange = {
                                 searchQuery = it
                                 viewModel.updateSearchTerm(it)
                             },
-                            onClose = { 
+                            onClose = {
                                 showSearch = false
                                 searchQuery = ""
                                 viewModel.updateSearchTerm(null)
@@ -159,6 +168,11 @@ fun StockingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .pullToRefresh(
+                    isRefreshing = isRefreshing,
+                    state = pullRefreshState,
+                    onRefresh = viewModel::refreshStockings
+                )
         ) {
             when (val state = uiState) {
                 HomeUiState.Uninitialized -> {}
@@ -240,6 +254,31 @@ fun StockingsScreen(
                     onDismiss = { showFilters = false }
                 )
             }
+
+            var refreshWavesHeight by remember { mutableStateOf(0) }
+
+            // Add the water animation overlay when refreshing
+            if (isRefreshing || pullRefreshState.distanceFraction > 0f) {
+                WavyLoadingIndicator(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .onGloballyPositioned { coordinates ->
+                            refreshWavesHeight = coordinates.size.height
+                        }
+                        .graphicsLayer {
+                            alpha = AppConfig.REFRESH_WAVE_ANIMATION_ALPHA
+                            translationY = refreshWavesHeight -
+                                    (refreshWavesHeight * AppConfig.REFRESH_WAVE_ANIMATION_HEIGHT_FRACTION) *
+                                    pullRefreshState.distanceFraction
+                        },
+                    centerWave = false
+                )
+            }
+            PullToRefreshDefaults.Indicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                state = pullRefreshState,
+                isRefreshing = isRefreshing
+            )
         }
     }
 }
@@ -284,26 +323,26 @@ private fun SearchBar(
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    
+
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
-    
+
     LaunchedEffect(query) {
         if (query.isEmpty()) {
             keyboardController?.show()
         }
     }
-    
+
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            onClick = { 
+            onClick = {
                 keyboardController?.hide()
                 focusManager.clearFocus()
-                onClose() 
+                onClose()
             }
         ) {
             Icon(

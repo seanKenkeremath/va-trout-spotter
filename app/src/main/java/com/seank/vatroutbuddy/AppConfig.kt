@@ -25,6 +25,9 @@ object AppConfig {
     // This should be longer than modal exit length or it will not be visible
     const val MODAL_LOADING_ANIMATION_DURATION_OUT = 500
     const val MODAL_ANIMATION_DELAY = 100
+    // The relative height of the screen the bottom waves should take up when refreshing
+    const val REFRESH_WAVE_ANIMATION_HEIGHT_FRACTION = .2f
+    const val REFRESH_WAVE_ANIMATION_ALPHA = .4f
 
     // Nav
     const val ALLOW_COLLAPSIBLE_NAV = false
