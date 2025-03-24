@@ -81,4 +81,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-[License information]
+This project and its code are licensed under the terms of the Apache License 2.0.
