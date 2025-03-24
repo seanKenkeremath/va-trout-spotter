@@ -19,6 +19,9 @@
     <string name="notifications_waterbody_section_title">Stocking Area Notifications</string>
     <string name="notifications_edit_button">Edit</string>
     <string name="notifications_remove_button">Remove notification</string>
+    <string name="notifications_empty_message">You haven\'t set any notifications</string>
+    <string name="notifications_empty_body">Get notified on your device when your favorite trout fishing spots get stocked</string>
+    <string name="notifications_set_button">Set notifications</string>
     <string name="edit_notifications_title">Edit notifications</string>
     <string name="notifications_tab_counties">Counties</string>
     <string name="notifications_tab_waterbodies">Stocking areas</string>

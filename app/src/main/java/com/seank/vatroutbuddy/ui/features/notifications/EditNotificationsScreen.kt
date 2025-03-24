@@ -227,4 +227,4 @@ private fun SubscriptionList(
             }
         }
     }
-} 
+}

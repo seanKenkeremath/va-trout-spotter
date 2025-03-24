@@ -8,7 +8,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,27 +23,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -62,14 +52,13 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.seank.vatroutbuddy.R
-import com.seank.vatroutbuddy.ui.navigation.NavigationRoutes
+import com.seank.vatroutbuddy.ui.theme.AppTheme
 
 @Composable
 fun NotificationsScreen(
@@ -200,64 +189,82 @@ private fun NotificationsScreenContent(
                 }
 
                 is NotificationsUiState.Success -> {
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp)
-                    ) {
-                        stickyHeader {
-                            SectionHeader(
-                                title = stringResource(R.string.notifications_county_section_title),
-                                onEditClick = editNotifications
-                            )
-                        }
-
-                        if (uiState.subscribedCounties.isEmpty()) {
-                            item {
-                                EmptySubscriptionSection(
-                                    text = "No notifications"
+                    if (uiState.subscribedCounties.isEmpty() && uiState.subscribedWaterbodies.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.notifications_empty_message),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    textAlign = TextAlign.Center
                                 )
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
+                                
+                                Text(
+                                    text = stringResource(R.string.notifications_empty_body),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    textAlign = TextAlign.Center,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                
+                                Spacer(modifier = Modifier.height(24.dp))
+                                
+                                Button(onClick = editNotifications) {
+                                    Text(stringResource(R.string.notifications_set_button))
+                                }
                             }
-                        } else {
-                            items(
-                                items = uiState.subscribedCounties,
-                                key = { it }
-                            ) { county ->
-                                SubscriptionItem(
-                                    text = county,
-                                    onRemove = { toggleCountySubscription(county, false) }
-                                )
-                            }
                         }
-
-                        stickyHeader {
-                            SectionHeader(
-                                title = stringResource(R.string.notifications_waterbody_section_title),
-                                onEditClick = editNotifications
-                            )
-                        }
-
-                        if (uiState.subscribedWaterbodies.isEmpty()) {
-                            item {
-                                EmptySubscriptionSection(
-                                    text = "No notifications"
-                                )
+                    } else {
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp)
+                        ) {
+                            if (uiState.subscribedCounties.isNotEmpty()) {
+                                stickyHeader {
+                                    SimpleSectionHeader(
+                                        title = stringResource(R.string.notifications_county_section_title)
+                                    )
+                                }
+                                
+                                items(
+                                    items = uiState.subscribedCounties,
+                                    key = { it }
+                                ) { county ->
+                                    SubscriptionItem(
+                                        text = county,
+                                        onRemove = { toggleCountySubscription(county, false) }
+                                    )
+                                }
                             }
-                        } else {
-                            items(
-                                items = uiState.subscribedWaterbodies,
-                                key = { it }
-                            ) { waterbody ->
-                                SubscriptionItem(
-                                    text = waterbody,
-                                    onRemove = {
-                                        toggleWaterbodySubscription(
-                                            waterbody,
-                                            false
-                                        )
-                                    }
-                                )
+                            
+                            if (uiState.subscribedWaterbodies.isNotEmpty()) {
+                                stickyHeader {
+                                    SimpleSectionHeader(
+                                        title = stringResource(R.string.notifications_waterbody_section_title)
+                                    )
+                                }
+                                
+                                items(
+                                    items = uiState.subscribedWaterbodies,
+                                    key = { it }
+                                ) { waterbody ->
+                                    SubscriptionItem(
+                                        text = waterbody,
+                                        onRemove = {
+                                            toggleWaterbodySubscription(
+                                                waterbody,
+                                                false
+                                            )
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
@@ -268,9 +275,8 @@ private fun NotificationsScreenContent(
 }
 
 @Composable
-private fun SectionHeader(
+private fun SimpleSectionHeader(
     title: String,
-    onEditClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface {
@@ -278,37 +284,13 @@ private fun SectionHeader(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp, bottom = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge
             )
-            TextButton(onClick = onEditClick) {
-                Text(stringResource(R.string.notifications_edit_button).uppercase())
-            }
         }
-    }
-}
-
-@Composable
-private fun EmptySubscriptionSection(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
     }
 }
 
@@ -389,4 +371,62 @@ private fun NotificationsPermissionPrompt(
             }
         }
     }
-} 
+}
+
+@Preview
+@Composable
+private fun NotificationsDisabledPreview() {
+    AppTheme {
+        NotificationsScreenContent(
+            uiState = NotificationsUiState.NoPermissions,
+            collapsibleToolbar = false,
+            editNotifications = {},
+            refreshPermissions = {},
+            requestNotificationPermissions = {},
+            toggleWaterbodySubscription = { _, _ -> },
+            toggleCountySubscription = { _, _ ->},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun NotificationsEmptyStatePreview() {
+    AppTheme {
+        NotificationsScreenContent(
+            uiState = NotificationsUiState.Success(
+                counties = emptyList(),
+                waterbodies = emptyList(),
+                subscribedCounties = emptyList(),
+                subscribedWaterbodies = emptyList()
+            ),
+            collapsibleToolbar = false,
+            editNotifications = {},
+            refreshPermissions = {},
+            requestNotificationPermissions = {},
+            toggleWaterbodySubscription = { _, _ -> },
+            toggleCountySubscription = { _, _ ->},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun NotificationsListPreview() {
+    AppTheme {
+        NotificationsScreenContent(
+            uiState = NotificationsUiState.Success(
+                counties = listOf("County 1", "County 2"),
+                waterbodies = listOf("Lake 1", "Lake 2"),
+                subscribedCounties = listOf("County 2"),
+                subscribedWaterbodies = emptyList()
+            ),
+            collapsibleToolbar = false,
+            editNotifications = {},
+            refreshPermissions = {},
+            requestNotificationPermissions = {},
+            toggleWaterbodySubscription = { _, _ -> },
+            toggleCountySubscription = { _, _ ->},
+        )
+    }
+}
