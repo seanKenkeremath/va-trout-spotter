@@ -48,7 +48,7 @@ class FetchAndNotifyStockingsUseCase @Inject constructor(
 
     private fun sendStockingNotification(stocking: StockingInfo) {
         val notification = NotificationCompat.Builder(notificationManager.context, NotificationManager.CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification)
+            .setSmallIcon(R.drawable.ic_trout)
             .setContentTitle(notificationManager.context.getString(R.string.notification_stocking_title))
             .setContentText(notificationManager.context.getString(
                 R.string.notification_stocking_content, 
