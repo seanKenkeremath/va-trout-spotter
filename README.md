@@ -1,5 +1,7 @@
 # VA Trout Buddy
 
+<img src="app/src/main/ic_launcher-playstore.png" width="300">
+
 ## Overview
 
 VA Trout Buddy is an Android app that provides Virginia anglers with up-to-date information about trout stockings across the state. The app scrapes the Virginia Department of Wildlife Resources (DWR) website for trout stocking information, including which bodies of water have been stocked, when they were stocked, and what types of trout were added. Key features include:
