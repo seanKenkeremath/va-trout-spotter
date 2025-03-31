@@ -1,32 +1,27 @@
 package com.kenkeremath.vatroutbuddy.ui.navigation
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.kenkeremath.vatroutbuddy.R
 
 enum class BottomNavItem(
     val route: String,
-    val icon: ImageVector,
+    @DrawableRes val iconResId: Int,
     @StringRes val labelResId: Int
 ) {
     Stockings(
         route = NavigationRoutes.Stockings.route,
-        icon = Icons.Default.Home,
+        iconResId = R.drawable.ic_trout,
         labelResId = R.string.title_stockings
     ),
     Notifications(
         route = NavigationRoutes.Notifications.route,
-        icon = Icons.Default.Notifications,
+        iconResId = R.drawable.ic_notifications,
         labelResId = R.string.title_notifications
     ),
     Settings(
         route = NavigationRoutes.Settings.route,
-        icon = Icons.Default.Settings,
+        iconResId = R.drawable.ic_settings,
         labelResId = R.string.title_settings
     )
 } 
