@@ -1,9 +1,16 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <style name="Theme.VATroutBuddy" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">#0000</item>
         <item name="android:navigationBarColor">#0000</item>
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowLightStatusBar">@bool/light_status_bar</item>
+    </style>
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="postSplashScreenTheme">@style/Theme.VATroutBuddy</item>
     </style>
 
     <style name="LicensesTheme" parent="Theme.AppCompat.DayNight"/>
