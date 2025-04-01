@@ -93,15 +93,6 @@ class StockingDaoTest {
     }
 
     @Test
-    fun `insertAndReturnStockings inserts and returns the inserted stockings`() = runBlocking {
-        val stocking = createStocking(1, LocalDate.now(), "Lake A")
-        val result = stockingDao.insertAndReturnStockings(listOf(stocking))
-
-        assertEquals(1, result.size)
-        assertEquals("Lake A", result[0].waterbody)
-    }
-
-    @Test
     fun `getStockingsPaged returns paged stockings based on criteria`() = runBlocking {
         val today = LocalDate.now()
         val stocking1 = createStocking(1, today, "Lake A")

@@ -35,13 +35,17 @@ class StockingRepository @Inject constructor(
         try {
             val entities = networkDataSource.fetchStockings(
                 startDate = startDate,
-                endDate = endDate
+                endDate = endDate,
             )
                 .getOrThrow()
                 .map {
                     StockingEntity.fromStockingInfo(it, LocalDateTime.now())
                 }
-            val stockingInfos = stockingDao.insertAndReturnStockings(entities)
+
+            val newIds = stockingDao.insertStockings(entities)
+            val stockingInfos = stockingDao.getStockingsSinceDate(startDate).filter {
+                it.id in newIds // Ensure we only return newly inserted stockings
+            }
             Result.success(stockingInfos.map { it.toStockingInfo() })
         } catch (e: Exception) {
             Result.failure(e)

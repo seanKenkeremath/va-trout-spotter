@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Transaction
 import java.time.LocalDate
 
 @Dao
@@ -19,19 +18,14 @@ interface StockingDao {
     @Query("SELECT * FROM stockings WHERE id IN (:ids)")
     suspend fun getStockingsById(ids: List<Long>): List<StockingEntity>
 
-    @Transaction
-    suspend fun insertAndReturnStockings(entities: List<StockingEntity>): List<StockingEntity> {
-        val ids = insertStockings(entities)
-        return getStockingsById(ids)
-    }
-
     @Query("SELECT MIN(date) FROM stockings")
     suspend fun getEarliestStockingDate(): LocalDate?
 
     @Query("SELECT * FROM stockings WHERE waterbody = :waterbody ORDER BY date DESC LIMIT :limit")
     suspend fun getStockingsByWaterbody(waterbody: String, limit: Int): List<StockingEntity>
 
-    @Query("""
+    @Query(
+        """
     SELECT * FROM stockings
     WHERE (:counties IS NULL OR ',' || :counties || ',' LIKE '%,' || county || ',%')
     AND (:isNationalForest IS NULL OR isNationalForest = :isNationalForest)
@@ -43,7 +37,8 @@ interface StockingDao {
          LOWER(county) LIKE '%' || LOWER(:searchTerm) || '%')
     ORDER BY date DESC, waterbody, id
     LIMIT :limit
-""")
+"""
+    )
     suspend fun getMostRecentStockings(
         counties: List<String>? = null,
         isNationalForest: Boolean? = null,
@@ -93,4 +88,9 @@ interface StockingDao {
 
     @Query("SELECT DISTINCT category FROM stockings ORDER BY category")
     suspend fun getAllCategories(): List<String>
+
+    @Query("SELECT * FROM stockings WHERE date >= :sinceDate ORDER BY date DESC, waterbody, id")
+    suspend fun getStockingsSinceDate(
+        sinceDate: LocalDate
+    ): List<StockingEntity>
 } 
