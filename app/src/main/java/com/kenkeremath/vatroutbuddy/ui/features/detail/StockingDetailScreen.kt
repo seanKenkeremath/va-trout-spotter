@@ -56,7 +56,7 @@ fun StockingDetailScreen(
 ) {
     val locationName by viewModel.locationName.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -83,12 +83,14 @@ fun StockingDetailScreen(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
+
                 is StockingDetailUiState.Success -> {
                     StockingDetailContent(
                         stocking = state.stocking,
                         relatedStockings = state.relatedStockings
                     )
                 }
+
                 is StockingDetailUiState.Error -> {
                     Column(
                         modifier = Modifier
@@ -128,13 +130,16 @@ private fun StockingDetailContent(
             StockingDetailCard(stocking = stocking)
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = stringResource(R.string.waterbody_recent_stockings_format, stocking.waterbody),
+                text = stringResource(
+                    R.string.waterbody_recent_stockings_format,
+                    stocking.waterbody
+                ),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
-        
+
         if (relatedStockings.isEmpty()) {
             item {
                 Text(
@@ -146,7 +151,7 @@ private fun StockingDetailContent(
         } else {
             itemsIndexed(relatedStockings) { index, relatedStocking ->
                 RelatedStockingItem(stocking = relatedStocking)
-                if (index != relatedStockings.size -1) {
+                if (index != relatedStockings.size - 1) {
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 }
             }
@@ -165,10 +170,15 @@ private fun StockingDetailCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            DetailRow(label = stringResource(R.string.waterbody_county_label), value = stocking.county)
-            DetailRow(label = stringResource(R.string.waterbody_category_label), value = stocking.category)
-            Spacer(modifier = Modifier.height(8.dp))
-            WaterTypeTags(stocking = stocking)
+            DetailRow(
+                label = stringResource(R.string.waterbody_county_label),
+                value = stocking.county
+            )
+            DetailRow(
+                label = stringResource(R.string.waterbody_category_label),
+                value = stocking.category
+            )
+            WaterTypeTags(stocking = stocking, modifier = Modifier.padding(top = 8.dp))
         }
     }
 }
@@ -179,7 +189,7 @@ private fun WaterTypeTags(
     modifier: Modifier = Modifier
 ) {
     val tags = mutableListOf<String>()
-    
+
     if (stocking.isNationalForest) {
         tags.add(stringResource(R.string.waterbody_is_national_forest_water))
     }
@@ -189,27 +199,27 @@ private fun WaterTypeTags(
     if (stocking.isHeritageDayWater) {
         tags.add(stringResource(R.string.waterbody_is_heritage_day_water))
     }
-    
-    if (tags.isEmpty()) return
-    
-    androidx.compose.foundation.layout.FlowRow(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        tags.forEachIndexed { index, tag ->
-            WaterTypeTag(text = tag)
-            
-            // Add divider if not the last item
-            if (index < tags.size - 1) {
-                androidx.compose.material3.VerticalDivider(
-                    modifier = Modifier
-                        .height(16.dp)
-                        .padding(horizontal = 4.dp)
-                        .align(Alignment.CenterVertically),
-                    thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                )
+
+    if (tags.isNotEmpty()) {
+        androidx.compose.foundation.layout.FlowRow(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            tags.forEachIndexed { index, tag ->
+                WaterTypeTag(text = tag)
+
+                // Add divider if not the last item
+                if (index < tags.size - 1) {
+                    androidx.compose.material3.VerticalDivider(
+                        modifier = Modifier
+                            .height(16.dp)
+                            .padding(horizontal = 4.dp)
+                            .align(Alignment.CenterVertically),
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
+                }
             }
         }
     }
@@ -268,12 +278,15 @@ private fun RelatedStockingItem(
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold
         )
-       if (stocking.species.isNotEmpty()) {
-           Spacer(modifier = Modifier.height(4.dp))
-           Text(
-               text = stringResource(R.string.stockings_species_format, stocking.species.joinToString(", ")),
-               style = MaterialTheme.typography.bodyMedium
-           )
+        if (stocking.species.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(
+                    R.string.stockings_species_format,
+                    stocking.species.joinToString(", ")
+                ),
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
