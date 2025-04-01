@@ -130,7 +130,7 @@ private fun StockingDetailContent(
             Text(
                 text = stringResource(R.string.waterbody_recent_stockings_format, stocking.waterbody),
                 style = MaterialTheme.typography.titleMedium,
-//                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -167,17 +167,66 @@ private fun StockingDetailCard(
         ) {
             DetailRow(label = stringResource(R.string.waterbody_county_label), value = stocking.county)
             DetailRow(label = stringResource(R.string.waterbody_category_label), value = stocking.category)
-            if (stocking.isNationalForest) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.waterbody_is_national_forest_water),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontWeight = FontWeight.Bold
+            Spacer(modifier = Modifier.height(8.dp))
+            WaterTypeTags(stocking = stocking)
+        }
+    }
+}
+
+@Composable
+private fun WaterTypeTags(
+    stocking: StockingInfo,
+    modifier: Modifier = Modifier
+) {
+    val tags = mutableListOf<String>()
+    
+    if (stocking.isNationalForest) {
+        tags.add(stringResource(R.string.waterbody_is_national_forest_water))
+    }
+    if (stocking.isDelayedHarvest) {
+        tags.add(stringResource(R.string.waterbody_is_delayed_harvest_water))
+    }
+    if (stocking.isHeritageDayWater) {
+        tags.add(stringResource(R.string.waterbody_is_heritage_day_water))
+    }
+    
+    if (tags.isEmpty()) return
+    
+    androidx.compose.foundation.layout.FlowRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        tags.forEachIndexed { index, tag ->
+            WaterTypeTag(text = tag)
+            
+            // Add divider if not the last item
+            if (index < tags.size - 1) {
+                androidx.compose.material3.VerticalDivider(
+                    modifier = Modifier
+                        .height(16.dp)
+                        .padding(horizontal = 4.dp)
+                        .align(Alignment.CenterVertically),
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 )
             }
         }
     }
+}
+
+@Composable
+private fun WaterTypeTag(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = modifier
+    )
 }
 
 @Composable

@@ -15,6 +15,8 @@
     <string name="waterbody_county_label">County</string>
     <string name="waterbody_category_label">Category</string>
     <string name="waterbody_is_national_forest_water">National forest water</string>
+    <string name="waterbody_is_delayed_harvest_water">Delayed harvest water</string>
+    <string name="waterbody_is_heritage_day_water">Heritage Day water</string>
     <string name="waterbody_recent_stockings_format">Recent stockings at %s</string>
     <string name="waterbody_recent_stockings_empty">No recent stockings at this location</string>
 
@@ -53,4 +55,7 @@
 
     <!-- Search Hint -->
     <string name="search_hint">Search location or county…</string>
+
+    <!-- About Text -->
+    <string name="about_text">VA Trout Buddy is a mobile app designed to help anglers track and find trout stocking information in Virginia waters.\n\nThe app provides up-to-date information on trout stocking locations, dates, and details to enhance your fishing experience in Virginia.\n\nVA Trout Buddy is open source software. You can view the source code, report issues, or contribute to the project on GitHub:\nhttps://github.com/kenkeremath/va-trout-buddy\n\nHappy fishing!</string>
 </resources>

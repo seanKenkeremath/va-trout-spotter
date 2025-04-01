@@ -22,7 +22,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.kenkeremath.vatroutbuddy.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +73,7 @@ fun FilterBottomSheet(
                         }
                     )
                     Text(
-                        text = "National Forest Water",
+                        text = stringResource(R.string.waterbody_is_national_forest_water),
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
@@ -95,31 +97,7 @@ fun FilterBottomSheet(
                         }
                     )
                     Text(
-                        text = "Heritage Day Water",
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { 
-                            onFiltersChanged(filters.copy(
-                                isNsf = if (filters.isNsf == true) null else true
-                            ))
-                        }
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = filters.isNsf == true,
-                        onCheckedChange = { checked ->
-                            onFiltersChanged(filters.copy(
-                                isNsf = if (checked) true else null
-                            ))
-                        }
-                    )
-                    Text(
-                        text = "NSF",
+                        text = stringResource(R.string.waterbody_is_heritage_day_water),
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
@@ -143,7 +121,7 @@ fun FilterBottomSheet(
                         }
                     )
                     Text(
-                        text = "Delayed Harvest Water",
+                        text = stringResource(R.string.waterbody_is_delayed_harvest_water),
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
