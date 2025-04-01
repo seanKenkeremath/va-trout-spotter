@@ -301,14 +301,24 @@ private fun StockingItem(
                 .fillMaxWidth()
         ) {
             Text(
-                text = "${stocking.waterbody}, ${stocking.county}",
+                text = stocking.waterbody,
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Species: ${stocking.species.joinToString(", ")}",
+                text = stocking.county,
                 style = MaterialTheme.typography.bodyMedium
             )
+            if (stocking.species.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(
+                        R.string.stockings_species_format,
+                        stocking.species.joinToString(", ")
+                    ),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }

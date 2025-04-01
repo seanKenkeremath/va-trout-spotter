@@ -165,11 +165,6 @@ private fun StockingDetailCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(
-                text = stringResource(R.string.waterbody_details_header),
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Spacer(modifier = Modifier.height(4.dp))
             DetailRow(label = stringResource(R.string.waterbody_county_label), value = stocking.county)
             DetailRow(label = stringResource(R.string.waterbody_category_label), value = stocking.category)
             if (stocking.isNationalForest) {
@@ -224,11 +219,13 @@ private fun RelatedStockingItem(
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = "Species: ${stocking.species.joinToString(", ")}",
-            style = MaterialTheme.typography.bodyMedium
-        )
+       if (stocking.species.isNotEmpty()) {
+           Spacer(modifier = Modifier.height(4.dp))
+           Text(
+               text = stringResource(R.string.stockings_species_format, stocking.species.joinToString(", ")),
+               style = MaterialTheme.typography.bodyMedium
+           )
+        }
     }
 }
 

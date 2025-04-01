@@ -1,15 +1,16 @@
 <resources>
     <string name="app_name">VA Trout Buddy</string>
-    <string name="title_stockings">Stockings</string>
+    <string name="title_stockings">Stocking Records</string>
+    <string name="title_stockings_short">Stockings</string>
     <string name="title_notifications">Notifications</string>
 
     <!-- Stockings Screen -->
     <string name="stockings_initial_load_message">Loading recent stocking records…</string>
     <string name="stockings_empty_message">No matching records found</string>
     <string name="stockings_empty_body">Try modifying or clearing your filters</string>
+    <string name="stockings_species_format">Species: %s</string>
 
     <!-- Waterbody detail -->
-    <string name="waterbody_details_header">About this location</string>
     <string name="waterbody_county_label">County</string>
     <string name="waterbody_category_label">Category</string>
     <string name="waterbody_is_national_forest_water">National Forest Water</string>
@@ -50,5 +51,5 @@
     <string name="settings_build_version">Build version</string>
 
     <!-- Search Hint -->
-    <string name="search_hint">Search waterbody or county…</string>
+    <string name="search_hint">Search location or county…</string>
 </resources>

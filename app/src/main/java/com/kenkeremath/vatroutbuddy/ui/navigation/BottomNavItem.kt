@@ -12,7 +12,7 @@ enum class BottomNavItem(
     Stockings(
         route = NavigationRoutes.Stockings.route,
         iconResId = R.drawable.ic_trout,
-        labelResId = R.string.title_stockings
+        labelResId = R.string.title_stockings_short
     ),
     Notifications(
         route = NavigationRoutes.Notifications.route,
