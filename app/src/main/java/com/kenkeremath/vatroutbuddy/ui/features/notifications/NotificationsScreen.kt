@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -200,7 +201,7 @@ private fun NotificationsScreenContent(
                             ) {
                                 Text(
                                     text = stringResource(R.string.notifications_empty_message),
-                                    style = MaterialTheme.typography.headlineSmall,
+                                    style = MaterialTheme.typography.displayMedium,
                                     textAlign = TextAlign.Center
                                 )
                                 
@@ -343,13 +344,13 @@ private fun NotificationsPermissionPrompt(
             Icon(
                 imageVector = Icons.Default.Notifications,
                 contentDescription = null,
-                modifier = Modifier.padding(bottom = 16.dp),
+                modifier = Modifier.padding(bottom = 16.dp).size(48.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
 
             Text(
                 text = stringResource(R.string.notifications_permission_title),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.displayMedium,
                 textAlign = TextAlign.Center
             )
 

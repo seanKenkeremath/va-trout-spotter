@@ -17,7 +17,7 @@ enum class BottomNavItem(
     Notifications(
         route = NavigationRoutes.Notifications.route,
         iconResId = R.drawable.ic_notifications,
-        labelResId = R.string.title_notifications
+        labelResId = R.string.title_notifications_short
     ),
     Settings(
         route = NavigationRoutes.Settings.route,

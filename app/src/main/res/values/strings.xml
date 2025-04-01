@@ -1,25 +1,26 @@
 <resources>
     <string name="app_name">VA Trout Buddy</string>
-    <string name="title_stockings">Stocking Records</string>
+    <string name="title_stockings">Stocking records</string>
     <string name="title_stockings_short">Stockings</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_notifications">Stocking notifications</string>
+    <string name="title_notifications_short">Stockings</string>
 
     <!-- Stockings Screen -->
     <string name="stockings_initial_load_message">Loading recent stocking records…</string>
-    <string name="stockings_empty_message">No matching records found</string>
+    <string name="stockings_empty_message">No matching records</string>
     <string name="stockings_empty_body">Try modifying or clearing your filters</string>
     <string name="stockings_species_format">Species: %s</string>
 
     <!-- Waterbody detail -->
     <string name="waterbody_county_label">County</string>
     <string name="waterbody_category_label">Category</string>
-    <string name="waterbody_is_national_forest_water">National Forest Water</string>
+    <string name="waterbody_is_national_forest_water">National forest water</string>
     <string name="waterbody_recent_stockings_format">Recent stockings at %s</string>
     <string name="waterbody_recent_stockings_empty">No recent stockings at this location</string>
 
     <!-- Notifications Screen -->
-    <string name="notifications_county_section_title">County Notifications</string>
-    <string name="notifications_waterbody_section_title">Stocking Area Notifications</string>
+    <string name="notifications_county_section_title">County notifications</string>
+    <string name="notifications_waterbody_section_title">Stocking area notifications</string>
     <string name="notifications_edit_button">Edit</string>
     <string name="notifications_remove_button">Remove notification</string>
     <string name="notifications_empty_message">You haven\'t set any notifications</string>
@@ -32,12 +33,12 @@
     <string name="waterbodies_search_hint">Search by stocking area…</string>
 
     <!-- Notifications Permission Screen -->
-    <string name="notifications_permission_title">Enable Notifications</string>
+    <string name="notifications_permission_title">Enable notifications</string>
     <string name="notifications_permission_description">Get notified when your favorite waters are stocked with trout</string>
-    <string name="notifications_permission_button">Open Settings</string>
+    <string name="notifications_permission_button">Open settings</string>
 
     <!-- Stocking Notifications -->
-    <string name="notification_stocking_title">New Stocking Alert!</string>
+    <string name="notification_stocking_title">New stocking alert!</string>
     <string name="notification_stocking_content">%1$s has been stocked!</string>
 
     <!-- Settings Screen -->

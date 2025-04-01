@@ -28,13 +28,13 @@ fun StockingsEmpty(modifier: Modifier = Modifier) {
     ) {
         Text(
             text = stringResource(R.string.stockings_empty_message),
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(R.string.stockings_empty_body),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )
     }

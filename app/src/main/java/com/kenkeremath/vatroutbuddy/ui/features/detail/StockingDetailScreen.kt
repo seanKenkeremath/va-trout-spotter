@@ -130,7 +130,7 @@ private fun StockingDetailContent(
             Text(
                 text = stringResource(R.string.waterbody_recent_stockings_format, stocking.waterbody),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+//                fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
         }

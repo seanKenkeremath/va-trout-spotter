@@ -34,7 +34,7 @@ fun StockingsInitialLoad(modifier: Modifier = Modifier) {
             ) {
                 Text(
                     text = stringResource(R.string.stockings_initial_load_message),
-                    style = MaterialTheme.typography.headlineLarge,
+                    style = MaterialTheme.typography.displayLarge,
                     textAlign = TextAlign.Center
                 )
             }

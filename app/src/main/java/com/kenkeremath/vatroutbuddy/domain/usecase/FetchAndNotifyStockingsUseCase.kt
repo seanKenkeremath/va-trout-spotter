@@ -4,7 +4,6 @@ import com.kenkeremath.vatroutbuddy.data.repository.NotificationSubscriptionRepo
 import com.kenkeremath.vatroutbuddy.data.repository.StockingRepository
 import com.kenkeremath.vatroutbuddy.domain.model.StockingInfo
 import com.kenkeremath.vatroutbuddy.notifications.NotificationManager
-import com.kenkeremath.vatroutbuddy.worker.StockingUpdateWorker
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import androidx.core.app.NotificationCompat
