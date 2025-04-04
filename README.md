@@ -73,13 +73,12 @@ VA Trout Spotter follows modern Android architecture principles:
 
 ## Future Enhancements
 
-- Map integration for directions to stocking locations
 - Weather data integration
 - Log catches and other notes
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to file an issue or submit a Pull Request.
 
 ## License
 
