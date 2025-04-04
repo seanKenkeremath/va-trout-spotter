@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.kenkeremath.vatroutbuddy"
+    namespace = "com.kenkeremath.vatroutspotter"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.kenkeremath.vatroutbuddy"
+        applicationId = "com.kenkeremath.vatroutspotter"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

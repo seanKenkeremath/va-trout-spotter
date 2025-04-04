@@ -1,5 +1,5 @@
 <resources>
-    <style name="Theme.VATroutBuddy" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.VATroutSpotter" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">#0000</item>
         <item name="android:navigationBarColor">#0000</item>
         <item name="android:backgroundDimEnabled">false</item>
@@ -10,7 +10,7 @@
         <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
         <item name="windowSplashScreenAnimationDuration">1000</item>
-        <item name="postSplashScreenTheme">@style/Theme.VATroutBuddy</item>
+        <item name="postSplashScreenTheme">@style/Theme.VATroutSpotter</item>
     </style>
 
     <style name="LicensesTheme" parent="Theme.AppCompat.DayNight"/>

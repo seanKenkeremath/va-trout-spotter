@@ -1,10 +1,10 @@
-# VA Trout Buddy
+# VA Trout Spotter
 
 <img src="app/src/main/ic_launcher-playstore.png" width="300">
 
 ## Overview
 
-VA Trout Buddy is an Android app that provides Virginia anglers with up-to-date information about trout stockings across the state. The app scrapes the Virginia Department of Wildlife Resources (DWR) website for trout stocking information, including which bodies of water have been stocked, when they were stocked, and what types of trout were added. Key features include:
+VA Trout Spotter is an Android app that provides Virginia anglers with up-to-date information about trout stockings across the state. The app scrapes the Virginia Department of Wildlife Resources (DWR) website for trout stocking information, including which bodies of water have been stocked, when they were stocked, and what types of trout were added. Key features include:
 
 - **Customizable Notifications**: Subscribe to specific counties or stocking locations to receive notifications when new stockings occur
 - **Offline Access**: All stocking data is stored locally, allowing anglers to access information even without cell service
@@ -23,7 +23,7 @@ The app uses a multi-layered approach to gather and manage stocking data:
 
 ### Background Processing
 
-VA Trout Buddy leverages WorkManager for efficient background operations:
+VA Trout Spotter leverages WorkManager for efficient background operations:
 
 1. **Periodic Stocking Updates**: Schedules network requests every 12 hours when on unmetered connections (WiFi) to minimize data usage
 2. **Historical Data Fetching**: Performs a one-time fetch of historical stocking data (dating back to 2018) when the app is first installed
@@ -39,7 +39,7 @@ The app implements a sophisticated notification system:
 
 ### Architecture & Patterns
 
-VA Trout Buddy follows modern Android architecture principles:
+VA Trout Spotter follows modern Android architecture principles:
 
 1. **MVVM Architecture**: Clear separation of UI, business logic, and data layers
 2. **Use Cases**: Implements focused use cases for specific app operations (e.g., `FetchAndNotifyStockingsUseCase`)

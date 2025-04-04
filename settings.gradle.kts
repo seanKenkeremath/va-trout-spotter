@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "VA Trout Buddy"
+rootProject.name = "VA Trout Spotter"
 include(":app")

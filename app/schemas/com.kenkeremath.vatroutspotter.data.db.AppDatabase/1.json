@@ -1,0 +1,154 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "452abfc59f793adfbae5f98d8ca98b89",
+    "entities": [
+      {
+        "tableName": "stockings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `county` TEXT NOT NULL, `waterbody` TEXT NOT NULL, `category` TEXT NOT NULL, `species` TEXT NOT NULL, `isNationalForest` INTEGER NOT NULL, `isNsf` INTEGER NOT NULL, `isHeritageDayWater` INTEGER NOT NULL, `isDelayedHarvest` INTEGER NOT NULL, `lastUpdated` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "county",
+            "columnName": "county",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "waterbody",
+            "columnName": "waterbody",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "species",
+            "columnName": "species",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isNationalForest",
+            "columnName": "isNationalForest",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isNsf",
+            "columnName": "isNsf",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isHeritageDayWater",
+            "columnName": "isHeritageDayWater",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDelayedHarvest",
+            "columnName": "isDelayedHarvest",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUpdated",
+            "columnName": "lastUpdated",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_stockings_date_waterbody",
+            "unique": true,
+            "columnNames": [
+              "date",
+              "waterbody"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_stockings_date_waterbody` ON `${TABLE_NAME}` (`date`, `waterbody`)"
+          },
+          {
+            "name": "index_stockings_date_waterbody_id",
+            "unique": false,
+            "columnNames": [
+              "date",
+              "waterbody",
+              "id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_stockings_date_waterbody_id` ON `${TABLE_NAME}` (`date`, `waterbody`, `id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "notification_subscriptions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`type` TEXT NOT NULL, `value` TEXT NOT NULL, PRIMARY KEY(`type`, `value`))",
+        "fields": [
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "value",
+            "columnName": "value",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "type",
+            "value"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_notification_subscriptions_type_value",
+            "unique": true,
+            "columnNames": [
+              "type",
+              "value"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_notification_subscriptions_type_value` ON `${TABLE_NAME}` (`type`, `value`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '452abfc59f793adfbae5f98d8ca98b89')"
+    ]
+  }
+}
