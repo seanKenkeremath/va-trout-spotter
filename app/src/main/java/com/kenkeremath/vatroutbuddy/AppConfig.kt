@@ -16,6 +16,7 @@ object AppConfig {
 
     // Periodic background fetch config
     const val BACKGROUND_FETCH_FREQUENCY_HOURS = 12L
+    const val BACKGROUND_FETCH_DELAY_HOURS = 2L
 
     // Animations
     // This should be longest or tied for longest among modal animation lengths

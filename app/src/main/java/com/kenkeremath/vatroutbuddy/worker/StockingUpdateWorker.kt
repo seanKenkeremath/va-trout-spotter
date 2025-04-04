@@ -26,8 +26,4 @@ class StockingUpdateWorker @AssistedInject constructor(
             Result.retry()
         }
     }
-
-    companion object {
-        const val CHANNEL_ID = "stocking_notifications"
-    }
 } 

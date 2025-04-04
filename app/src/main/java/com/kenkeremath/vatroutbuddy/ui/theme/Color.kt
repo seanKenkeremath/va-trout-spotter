@@ -218,6 +218,12 @@ val surfaceContainerDarkHighContrast = Color(0xFF2F312A)
 val surfaceContainerHighDarkHighContrast = Color(0xFF3A3C35)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF454840)
 
+val waveStartLight = Color(0xFF3A678A)
+val waveEndLight = Color(0xFF2B4C66)
+
+val waveStartDark = Color(0XFF8AB1D1)
+val waveEndDark = Color(0XFF6599C3)
+
 
 
 

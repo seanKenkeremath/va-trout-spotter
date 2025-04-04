@@ -29,8 +29,9 @@ class StockingWorkScheduler @Inject constructor(
 
         val workRequest = PeriodicWorkRequestBuilder<StockingUpdateWorker>(
             repeatInterval = AppConfig.BACKGROUND_FETCH_FREQUENCY_HOURS,
-            repeatIntervalTimeUnit = TimeUnit.HOURS
+            repeatIntervalTimeUnit = TimeUnit.HOURS,
         )
+            .setInitialDelay(AppConfig.BACKGROUND_FETCH_DELAY_HOURS, TimeUnit.HOURS)
             .setConstraints(constraints)
             .build()
 

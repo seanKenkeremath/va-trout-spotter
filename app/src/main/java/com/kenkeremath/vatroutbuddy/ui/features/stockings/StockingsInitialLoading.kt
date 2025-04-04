@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import com.kenkeremath.vatroutbuddy.AppConfig
 import com.kenkeremath.vatroutbuddy.R
 import com.kenkeremath.vatroutbuddy.ui.components.WavyLoadingIndicator
 import com.kenkeremath.vatroutbuddy.ui.theme.AppTheme
@@ -25,6 +26,7 @@ fun StockingsInitialLoad(modifier: Modifier = Modifier) {
     BoxWithConstraints {
         val parentHeight = constraints.maxHeight.toFloat()
         WavyLoadingIndicator(modifier = Modifier.fillMaxSize().graphicsLayer {
+            alpha = AppConfig.REFRESH_WAVE_ANIMATION_ALPHA
             translationY = parentHeight/2
         })
         Column(
