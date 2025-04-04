@@ -2,6 +2,7 @@ package com.kenkeremath.vatroutspotter.ui.navigation
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.core.Ease
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.animateDpAsState
@@ -17,7 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -52,7 +53,10 @@ fun TroutSpotterDialog(
         dialogWindow?.setWindowAnimations(-1)
         dialogWindow?.setDimAmount(0f)
     }
-    var contentVisible by remember { mutableStateOf(false) }
+    
+    var contentVisible by rememberSaveable { mutableStateOf(false) }
+    var isFirstAppearance by rememberSaveable { mutableStateOf(true) }
+    
     val cornerRadius: Dp by animateDpAsState(
         targetValue = if (contentVisible) 0.dp else 80.dp,
         animationSpec = tween(
@@ -90,36 +94,48 @@ fun TroutSpotterDialog(
                 waveLength = 80.dp,
             )
         }
+        
         LaunchedEffect(Unit) {
-            contentVisible = true
+            if (!contentVisible) {
+                contentVisible = true
+            }
         }
 
         AnimatedVisibility(
-            contentVisible,
-            enter = slideInVertically(
-                initialOffsetY = { it },
-                animationSpec = tween(
-                    delayMillis = AppConfig.MODAL_ANIMATION_DELAY,
-                    durationMillis = AppConfig.MODAL_CONTENT_ANIMATION_DURATION_IN
+            visible = contentVisible,
+            enter = if (isFirstAppearance) {
+                slideInVertically(
+                    initialOffsetY = { it },
+                    animationSpec = tween(
+                        delayMillis = AppConfig.MODAL_ANIMATION_DELAY,
+                        durationMillis = AppConfig.MODAL_CONTENT_ANIMATION_DURATION_IN
+                    )
                 )
-            ),
+            } else {
+                EnterTransition.None
+            },
             exit = slideOutVertically(
                 targetOffsetY = { it },
                 animationSpec = tween(durationMillis = AppConfig.MODAL_CONTENT_ANIMATION_DURATION_OUT)
             ),
         ) {
             Surface(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 shape = RoundedCornerShape(cornerRadius)
             ) {
-                content { contentVisible = false }
+                content { 
+                    contentVisible = false 
+                }
             }
         }
 
-        // Wait for animation to complete before popping backstack
         LaunchedEffect(contentVisible) {
-            if (!contentVisible) {
+            if (contentVisible) {
+                // Mark first appearance as complete after animation
+                delay(AppConfig.MODAL_CONTENT_ANIMATION_DURATION_IN.toLong())
+                isFirstAppearance = false
+            } else {
+                // Allow navigation to complete before exiting
                 delay(AppConfig.MODAL_LOADING_ANIMATION_DURATION_OUT.toLong())
                 onNavigateBack()
             }
