@@ -88,7 +88,6 @@ fun TroutBuddyDialog(
                     .fillMaxSize()
                     .padding(top = 32.dp),
                 waveLength = 80.dp,
-                centerWave = false
             )
         }
         LaunchedEffect(Unit) {

@@ -67,7 +67,6 @@ import com.kenkeremath.vatroutbuddy.R
 import com.kenkeremath.vatroutbuddy.domain.model.StockingInfo
 import java.time.format.DateTimeFormatter
 import com.kenkeremath.vatroutbuddy.ui.components.WavyLoadingIndicator
-import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -271,7 +270,6 @@ fun StockingsScreen(
                                     (refreshWavesHeight * AppConfig.REFRESH_WAVE_ANIMATION_HEIGHT_FRACTION) *
                                     pullRefreshState.distanceFraction
                         },
-                    centerWave = false
                 )
             }
             PullToRefreshDefaults.Indicator(

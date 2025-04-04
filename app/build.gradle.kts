@@ -100,6 +100,9 @@ dependencies {
     implementation(libs.work.runtime.ktx)
     implementation(libs.hilt.work)
 
+    // Wave animation
+    implementation(libs.waves)
+
     // Testing
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)

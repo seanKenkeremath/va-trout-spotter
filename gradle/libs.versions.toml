@@ -21,6 +21,7 @@ jsoup = "1.17.2"
 ossLicensesPlugin = "0.10.6"
 playServicesOssLicenses = "17.1.0"
 room = "2.6.1"
+waves = "0.1.2"
 work = "2.9.0"
 mockk = "1.13.9"
 androidx-test = "1.5.0"
@@ -70,6 +71,7 @@ play-services-oss-licenses = { module = "com.google.android.gms:play-services-os
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+waves = { module = "io.github.seankenkeremath:waves", version.ref = "waves" }
 work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
