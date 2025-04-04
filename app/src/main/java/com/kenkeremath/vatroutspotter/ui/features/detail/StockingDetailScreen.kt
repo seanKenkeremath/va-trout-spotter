@@ -1,5 +1,6 @@
 package com.kenkeremath.vatroutspotter.ui.features.detail
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,8 +42,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.kenkeremath.vatroutspotter.R
 import com.kenkeremath.vatroutspotter.domain.model.StockingInfo
 import com.kenkeremath.vatroutspotter.ui.theme.AppTheme
+import java.net.URLEncoder
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -179,6 +184,53 @@ private fun StockingDetailCard(
                 value = stocking.category
             )
             WaterTypeTags(stocking = stocking, modifier = Modifier.padding(top = 8.dp))
+
+            DirectionsButton(
+                waterbody = stocking.waterbody,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            )
+            
+        }
+    }
+}
+
+@Composable
+private fun DirectionsButton(
+    waterbody: String,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    
+    Button(
+        onClick = {
+            val searchQuery = "$waterbody, Virginia"
+            val encodedQuery = URLEncoder.encode(searchQuery, "UTF-8")
+            val uri = "https://www.google.com/maps/search/?api=1&query=$encodedQuery".toUri()
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            
+            if (intent.resolveActivity(context.packageManager) != null) {
+                context.startActivity(intent)
+            } else {
+                // Fallback to browser if no maps app is available
+                val browserIntent = Intent(Intent.ACTION_VIEW,
+                    "https://www.google.com/maps/search/$encodedQuery".toUri())
+                context.startActivity(browserIntent)
+            }
+        },
+        modifier = modifier
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Place,
+                contentDescription = null,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+            Text(stringResource(R.string.get_directions))
         }
     }
 }

@@ -58,4 +58,7 @@
 
     <!-- About Text -->
     <string name="about_text">VA Trout Spotter is a mobile app designed to help anglers track and find trout stocking information in Virginia waters.\n\nThe app provides up-to-date information on trout stocking locations, dates, and details to enhance your fishing experience in Virginia.\n\nVA Trout Spotter is open source software. You can view the source code, report issues, or contribute to the project on GitHub:\nhttps://github.com/kenkeremath/va-trout-spotter\n\nHappy fishing!</string>
+
+    <!-- Add this to your strings.xml file -->
+    <string name="get_directions">Get Directions</string>
 </resources>
