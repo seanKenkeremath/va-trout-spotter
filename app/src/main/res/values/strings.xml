@@ -3,7 +3,7 @@
     <string name="title_stockings">Stocking records</string>
     <string name="title_stockings_short">Stockings</string>
     <string name="title_notifications">Stocking notifications</string>
-    <string name="title_notifications_short">Stockings</string>
+    <string name="title_notifications_short">Notifications</string>
 
     <!-- Stockings Screen -->
     <string name="stockings_initial_load_message">Loading recent stocking records…</string>
