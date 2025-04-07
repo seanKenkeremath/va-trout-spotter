@@ -28,6 +28,7 @@ fun SettingsScreen(
     onDebugMenuClick: () -> Unit,
     onAboutClick: () -> Unit,
     onAcknowledgementsClick: () -> Unit,
+    onDisclaimerClick: () -> Unit,
     modifier: Modifier = Modifier,
     collapsibleToolbar: Boolean = false
 ) {
@@ -73,6 +74,14 @@ fun SettingsScreen(
             )
             HorizontalDivider()
 
+            // Disclaimer
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.settings_disclaimer)) },
+                modifier = Modifier.clickable { onDisclaimerClick() }
+            )
+            HorizontalDivider()
+
+            // Acknowledgements
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_acknowledgements)) },
                 modifier = Modifier.clickable { onAcknowledgementsClick() }

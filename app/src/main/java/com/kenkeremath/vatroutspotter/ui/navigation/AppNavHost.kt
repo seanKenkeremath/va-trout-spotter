@@ -25,6 +25,7 @@ import com.kenkeremath.vatroutspotter.ui.features.settings.DebugMenuScreen
 import com.kenkeremath.vatroutspotter.ui.features.settings.SettingsScreen
 import com.kenkeremath.vatroutspotter.ui.features.stockings.StockingsScreen
 import com.kenkeremath.vatroutspotter.ui.features.notifications.EditNotificationsScreen
+import com.kenkeremath.vatroutspotter.ui.features.settings.DisclaimerScreen
 
 @Composable
 fun AppNavHost(modifier: Modifier = Modifier) {
@@ -87,6 +88,7 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                 SettingsScreen(
                     onDebugMenuClick = { navController.navigate(NavigationRoutes.DebugMenu.route) },
                     onAboutClick = { navController.navigate(NavigationRoutes.About.route) },
+                    onDisclaimerClick = { navController.navigate(NavigationRoutes.Disclaimer.route) },
                     onAcknowledgementsClick = {
                         val context = navController.context
                         val intent = Intent(context, OssLicensesMenuActivity::class.java)
@@ -111,6 +113,15 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                 route = NavigationRoutes.About.route,
             ) { onBackClick ->
                 AboutScreen(
+                    onBackClick = onBackClick
+                )
+            }
+
+            fullscreenDialog(
+                navController = navController,
+                route = NavigationRoutes.Disclaimer.route,
+            ) { onBackClick ->
+                DisclaimerScreen(
                     onBackClick = onBackClick
                 )
             }

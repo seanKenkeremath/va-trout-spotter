@@ -8,4 +8,5 @@ sealed class NavigationRoutes(val route: String) {
     data object StockingDetail : NavigationRoutes("stocking_detail")
     data object DebugMenu : NavigationRoutes("debug_menu")
     data object About : NavigationRoutes("about")
+    object Disclaimer : NavigationRoutes("disclaimer")
 }
