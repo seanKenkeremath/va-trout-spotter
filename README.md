@@ -2,6 +2,16 @@
 
 <img src="app/src/main/ic_launcher-playstore.png" width="300">
 
+
+## Overview
+
+VA Trout Spotter is an Android app that provides Virginia anglers with up-to-date information about trout stockings across the state. The app scrapes the Virginia Department of Wildlife Resources (DWR) website for trout stocking information, including which bodies of water have been stocked, when they were stocked, and what types of trout were added. Key features include:
+
+- **Customizable Notifications**: Subscribe to specific counties or stocking locations to receive notifications when new stockings occur
+- **Offline Access**: All stocking data is stored locally, allowing anglers to access information even without cell service
+- **Comprehensive Filtering**: Filter stockings by county and other criteria
+- **Historical Data**: Access years of historical stocking data to identify patterns and plan future trips
+
 <table>
   <tr>
     <td><img src="images/detail_open.gif" width="200"></td>
@@ -12,15 +22,6 @@
     <td><img src="images/dark_mode_notifications.png" width="200"></td>
   </tr>
 </table>
-
-## Overview
-
-VA Trout Spotter is an Android app that provides Virginia anglers with up-to-date information about trout stockings across the state. The app scrapes the Virginia Department of Wildlife Resources (DWR) website for trout stocking information, including which bodies of water have been stocked, when they were stocked, and what types of trout were added. Key features include:
-
-- **Customizable Notifications**: Subscribe to specific counties or stocking locations to receive notifications when new stockings occur
-- **Offline Access**: All stocking data is stored locally, allowing anglers to access information even without cell service
-- **Comprehensive Filtering**: Filter stockings by county and other criteria
-- **Historical Data**: Access years of historical stocking data to identify patterns and plan future trips
 
 ## Technical Implementation
 
