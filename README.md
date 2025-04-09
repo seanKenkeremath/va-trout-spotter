@@ -1,8 +1,17 @@
 # VA Trout Spotter
 
-<img src="app/src/main/ic_launcher-playstore.png" width="300">
-
-[![Get it on Google Play](https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png)](https://play.google.com/store/apps/details?id=com.kenkeremath.vatroutspotter)
+<table>
+  <tr>
+    <td>
+      <img src="app/src/main/ic_launcher-playstore.png" alt="App icon" width="100"/>
+    </td>
+    <td>
+      <a href="https://play.google.com/store/apps/details?id=com.kenkeremath.vatroutspotter">
+        <img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" alt="Get it on Google Play" height="80"/>
+      </a>
+    </td>
+  </tr>
+</table>
 
 ## Overview
 
