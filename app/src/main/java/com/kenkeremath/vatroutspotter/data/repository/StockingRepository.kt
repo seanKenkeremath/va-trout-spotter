@@ -7,6 +7,7 @@ import com.kenkeremath.vatroutspotter.data.db.StockingEntity
 import com.kenkeremath.vatroutspotter.data.network.StockingNetworkDataSource
 import com.kenkeremath.vatroutspotter.data.preferences.AppPreferences
 import com.kenkeremath.vatroutspotter.di.IoDispatcher
+import com.kenkeremath.vatroutspotter.domain.error.toDomainException
 import com.kenkeremath.vatroutspotter.domain.model.StockingInfo
 import com.kenkeremath.vatroutspotter.domain.model.StockingsListPage
 import kotlinx.coroutines.CoroutineDispatcher
@@ -23,7 +24,6 @@ class StockingRepository @Inject constructor(
     private val preferences: AppPreferences,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
-
     val hasInitialData = preferences.hasDownloadedInitialData
     val hasHistoricalData = preferences.hasDownloadedHistoricalData
 
@@ -48,7 +48,7 @@ class StockingRepository @Inject constructor(
             }
             Result.success(stockingInfos.map { it.toStockingInfo() })
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(e.toDomainException())
         }
     }
 
@@ -98,7 +98,7 @@ class StockingRepository @Inject constructor(
                     )
                 )
             } catch (e: Exception) {
-                Result.failure(e)
+                Result.failure(e.toDomainException())
             }
         }
 
@@ -136,7 +136,7 @@ class StockingRepository @Inject constructor(
                 )
             )
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(e.toDomainException())
         }
     }
 
@@ -152,7 +152,7 @@ class StockingRepository @Inject constructor(
                     }
                 }
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(e.toDomainException())
         }
     }
 
@@ -165,7 +165,7 @@ class StockingRepository @Inject constructor(
             val stockings = stockingDao.getStockingsByWaterbody(waterbody, limit)
             Result.success(stockings.map { it.toStockingInfo() })
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(e.toDomainException())
         }
     }
 

@@ -1,11 +1,14 @@
 package com.kenkeremath.vatroutspotter.ui.features.stockings
 
 import StockingFilters
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kenkeremath.vatroutspotter.AppConfig
 import com.kenkeremath.vatroutspotter.data.repository.StockingRepository
 import com.kenkeremath.vatroutspotter.di.IoDispatcher
+import com.kenkeremath.vatroutspotter.domain.error.bodyResId
+import com.kenkeremath.vatroutspotter.domain.error.messageResId
 import com.kenkeremath.vatroutspotter.domain.model.StockingInfo
 import com.kenkeremath.vatroutspotter.domain.usecase.FetchAndNotifyStockingsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,8 +30,8 @@ class StockingsViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val clock: Clock = DefaultClock(),
 ) : ViewModel() {
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing = _isRefreshing.asStateFlow()
+    private val _refreshingState = MutableStateFlow<RefreshingState>(RefreshingState.Idle)
+    val refreshingState = _refreshingState.asStateFlow()
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Uninitialized)
     val uiState = _uiState.asStateFlow()
     private val _pagingState = MutableStateFlow<PagingState>(PagingState.Idle)
@@ -60,22 +63,36 @@ class StockingsViewModel @Inject constructor(
                 _uiState.value = HomeUiState.LoadingInitialData
             }
 
-            fetchNewStockings()
+            fetchNewStockings(isRefresh = false)
         }
     }
 
-    private suspend fun fetchNewStockings() {
-        // Update last refresh time
-        lastRefreshTime = clock.currentTimeMillis()
-        
+    private suspend fun fetchNewStockings(isRefresh: Boolean) {
+
+        if (isRefresh) {
+            _refreshingState.value = RefreshingState.Refreshing
+        }
+
         // Fetch latest data
         val result = fetchAndNotifyStockingsUseCase.execute()
-        val stockings = result.getOrNull()
-        if (stockings == null) {
-            // TODO: error handling
-            _uiState.value = HomeUiState.Error(result.exceptionOrNull()?.message ?: "Error")
+
+        val stockings = try {
+            result.getOrThrow()
+        } catch (e: Exception) {
+            if (!isRefresh) {
+                _uiState.value = HomeUiState.Error(
+                    messageResId = e.messageResId,
+                    bodyResId = e.bodyResId
+                )
+            } else {
+                _refreshingState.value = RefreshingState.Error(e.messageResId)
+            }
             return
         }
+
+        // Update last refresh time on success
+        lastRefreshTime = clock.currentTimeMillis()
+
         loadFilterOptions()
         allStockings.addAll(stockings)
         if (_filters.value == StockingFilters()) {
@@ -83,6 +100,9 @@ class StockingsViewModel @Inject constructor(
             _uiState.value = HomeUiState.Success(
                 stockings = allStockings.toList()
             )
+            if (_refreshingState.value == RefreshingState.Refreshing) {
+                _refreshingState.value = RefreshingState.Idle
+            }
         }
     }
 
@@ -93,10 +113,13 @@ class StockingsViewModel @Inject constructor(
                 AppConfig.DEFAULT_PAGE_SIZE,
                 filters
             )
-            val page = loadResult.getOrNull()
-            if (page == null) {
-                // TODO: Error handling
-                _uiState.value = HomeUiState.Error(loadResult.exceptionOrNull()?.message ?: "Error")
+            val page = try {
+                loadResult.getOrThrow()
+            } catch (e: Exception) {
+                _uiState.value = HomeUiState.Error(
+                    messageResId = e.messageResId,
+                    bodyResId = e.bodyResId
+                )
                 return@launch
             }
             allStockings.addAll(page.stockings)
@@ -194,22 +217,23 @@ class StockingsViewModel @Inject constructor(
     }
 
     fun refreshStockings() {
+        if (_refreshingState.value == RefreshingState.Refreshing) {
+            return
+        }
         viewModelScope.launch {
             val currentTime = clock.currentTimeMillis()
             val timeSinceLastRefresh = currentTime - lastRefreshTime
-            
-            if (timeSinceLastRefresh < AppConfig.REFRESH_THROTTLE_MILLIS) {
+
+            if (_uiState.value !is HomeUiState.Error && timeSinceLastRefresh < AppConfig.REFRESH_THROTTLE_MILLIS) {
                 // If we're trying to refresh too soon, just show the refreshing indicator briefly
-                _isRefreshing.value = true
+                _refreshingState.value = RefreshingState.Refreshing
                 delay(AppConfig.REFRESH_THROTTLE_DELAY_MILLIS)
-                _isRefreshing.value = false
+                _refreshingState.value = RefreshingState.Idle
                 return@launch
             }
-            
+
             // Proceed with actual refresh
-            _isRefreshing.value = true
-            fetchNewStockings()
-            _isRefreshing.value = false
+            fetchNewStockings(isRefresh = true)
         }
     }
 }
@@ -219,14 +243,19 @@ sealed class HomeUiState {
     data object LoadingInitialData : HomeUiState()
     data object Empty : HomeUiState()
     data class Success(val stockings: List<StockingInfo>) : HomeUiState()
-
-    // TODO: Display error + retry
-    data class Error(val message: String) : HomeUiState()
+    data class Error(@StringRes val messageResId: Int, @StringRes val bodyResId: Int) :
+        HomeUiState()
 }
 
 sealed class PagingState {
-    object Idle : PagingState()
-    object Loading : PagingState()
-    object ReachedEnd : PagingState()
+    data object Idle : PagingState()
+    data object Loading : PagingState()
+    data object ReachedEnd : PagingState()
     data class Error(val exception: Throwable?) : PagingState()
-} 
+}
+
+sealed class RefreshingState {
+    data object Idle : RefreshingState()
+    data object Refreshing : RefreshingState()
+    data class Error(@StringRes val messageResId: Int) : RefreshingState()
+}

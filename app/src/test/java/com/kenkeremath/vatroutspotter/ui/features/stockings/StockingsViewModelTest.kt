@@ -8,6 +8,7 @@ import com.kenkeremath.vatroutspotter.domain.model.StockingsListPage
 import com.kenkeremath.vatroutspotter.domain.usecase.FetchAndNotifyStockingsUseCase
 import com.kenkeremath.vatroutspotter.util.Clock
 import com.kenkeremath.vatroutspotter.util.TestFactory
+import com.kenkeremath.vatroutspotter.R
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -24,7 +25,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -89,17 +89,14 @@ class StockingsViewModelTest {
 
     @Test
     fun `initial load error shows error state`() = runTest {
-        val errorMessage = "Network error"
-        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.failure(Exception(errorMessage))
+        coEvery { fetchAndNotifyStockingsUseCase.execute() } returns Result.failure(Exception())
         coEvery {
             repository.loadSavedStockings(
                 pageSize = any(),
                 stockingFilters = any()
             )
         } returns Result.failure(
-            Exception(
-                errorMessage
-            )
+            Exception()
         )
 
         createViewModel()
@@ -113,7 +110,7 @@ class StockingsViewModelTest {
         // Final state should be Error
         val finalState = viewModel.uiState.value
         assertTrue(finalState is HomeUiState.Error)
-        assertEquals(errorMessage, (finalState as HomeUiState.Error).message)
+        assertEquals(R.string.generic_error_message, (finalState as HomeUiState.Error).messageResId)
     }
 
     @Test
@@ -137,19 +134,19 @@ class StockingsViewModelTest {
         createViewModel()
         // Advance time to complete loading
         advanceUntilIdle()
-        assertFalse(viewModel.isRefreshing.value)
+        assertEquals(RefreshingState.Idle, viewModel.refreshingState.value)
 
         viewModel.refreshStockings()
 
         // isRefreshing should be true during refresh
         advanceTimeBy(250L)
-        assertTrue(viewModel.isRefreshing.value)
+        assertEquals(RefreshingState.Refreshing, viewModel.refreshingState.value)
 
         // Advance time to complete loading
         advanceUntilIdle()
 
         // isRefreshing should be false after completion
-        assertFalse(viewModel.isRefreshing.value)
+        assertEquals(RefreshingState.Idle, viewModel.refreshingState.value)
     }
 
     @Test

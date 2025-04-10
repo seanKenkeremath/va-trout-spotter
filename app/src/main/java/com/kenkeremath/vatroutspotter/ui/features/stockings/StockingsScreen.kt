@@ -1,6 +1,8 @@
 package com.kenkeremath.vatroutspotter.ui.features.stockings
 
 import FilterBottomSheet
+import StockingFilters
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,13 +17,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,6 +47,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -59,6 +65,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -67,8 +74,9 @@ import com.kenkeremath.vatroutspotter.R
 import com.kenkeremath.vatroutspotter.domain.model.StockingInfo
 import java.time.format.DateTimeFormatter
 import com.kenkeremath.vatroutspotter.ui.components.WavyLoadingIndicator
+import com.kenkeremath.vatroutspotter.ui.theme.AppTheme
+import java.time.LocalDate
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StockingsScreen(
     onStockingClick: (StockingInfo) -> Unit,
@@ -79,7 +87,38 @@ fun StockingsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val pagingState by viewModel.pagingState.collectAsState()
     val filters by viewModel.filters.collectAsState()
-    val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val refreshingState by viewModel.refreshingState.collectAsState()
+
+    StockingsScreen(
+        uiState = uiState,
+        pagingState = pagingState,
+        refreshingState = refreshingState,
+        filters = filters,
+        refreshStockings = viewModel::refreshStockings,
+        updateFilters = viewModel::updateFilters,
+        updateSearchTerm = viewModel::updateSearchTerm,
+        onLoadNextPage = viewModel::loadMoreStockings,
+        onStockingClick = onStockingClick,
+        modifier = modifier,
+        collapsibleToolbar = collapsibleToolbar,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StockingsScreen(
+    uiState: HomeUiState,
+    refreshingState: RefreshingState,
+    pagingState: PagingState,
+    filters: StockingFilters,
+    refreshStockings: () -> Unit,
+    updateFilters: (StockingFilters) -> Unit,
+    updateSearchTerm: (String?) -> Unit,
+    onStockingClick: (StockingInfo) -> Unit,
+    onLoadNextPage: () -> Unit,
+    modifier: Modifier = Modifier,
+    collapsibleToolbar: Boolean = false,
+) {
     var showFilters by remember { mutableStateOf(false) }
     var showSearch by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
@@ -116,12 +155,12 @@ fun StockingsScreen(
                             query = searchQuery,
                             onQueryChange = {
                                 searchQuery = it
-                                viewModel.updateSearchTerm(it)
+                                updateSearchTerm(it)
                             },
                             onClose = {
                                 showSearch = false
                                 searchQuery = ""
-                                viewModel.updateSearchTerm(null)
+                                updateSearchTerm(null)
                             }
                         )
                     } else {
@@ -168,9 +207,9 @@ fun StockingsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .pullToRefresh(
-                    isRefreshing = isRefreshing,
+                    isRefreshing = refreshingState == RefreshingState.Refreshing,
                     state = pullRefreshState,
-                    onRefresh = viewModel::refreshStockings
+                    onRefresh = refreshStockings
                 )
         ) {
             when (val state = uiState) {
@@ -225,23 +264,36 @@ fun StockingsScreen(
                 }
 
                 is HomeUiState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp)
+                            .verticalScroll(rememberScrollState())
                     ) {
                         Text(
-                            text = state.message,
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(16.dp)
+                            text = stringResource(state.messageResId),
+                            style = MaterialTheme.typography.headlineMedium,
+                            textAlign = TextAlign.Center
                         )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(state.bodyResId),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(onClick = refreshStockings) {
+                            Text(stringResource(R.string.retry))
+                        }
                     }
                 }
             }
 
             LaunchedEffect(shouldStartPaginate) {
                 if (shouldStartPaginate) {
-                    viewModel.loadMoreStockings()
+                    onLoadNextPage()
                 }
             }
 
@@ -249,33 +301,41 @@ fun StockingsScreen(
             if (showFilters) {
                 FilterBottomSheet(
                     filters = filters,
-                    onFiltersChanged = viewModel::updateFilters,
+                    onFiltersChanged = updateFilters,
                     onDismiss = { showFilters = false }
                 )
             }
 
-            var refreshWavesHeight by remember { mutableStateOf(0) }
+            var wavesHeight by remember { mutableIntStateOf(0) }
 
-            // Add the water animation overlay when refreshing
-            if (isRefreshing || pullRefreshState.distanceFraction > 0f) {
+            // Add the water animation overlay when refreshing or on error
+            if (uiState is HomeUiState.Error
+                || refreshingState is RefreshingState.Refreshing
+                || pullRefreshState.distanceFraction > 0f
+            ) {
                 WavyLoadingIndicator(
                     modifier = Modifier
                         .fillMaxSize()
                         .onGloballyPositioned { coordinates ->
-                            refreshWavesHeight = coordinates.size.height
+                            wavesHeight = coordinates.size.height
                         }
                         .graphicsLayer {
+                            val resolvedTranslationY = if (uiState is HomeUiState.Error) {
+                                wavesHeight - (wavesHeight * AppConfig.REFRESH_WAVE_ANIMATION_HEIGHT_FRACTION)
+                            } else {
+                                wavesHeight -
+                                        (wavesHeight * AppConfig.REFRESH_WAVE_ANIMATION_HEIGHT_FRACTION) *
+                                        pullRefreshState.distanceFraction
+                            }
                             alpha = AppConfig.REFRESH_WAVE_ANIMATION_ALPHA
-                            translationY = refreshWavesHeight -
-                                    (refreshWavesHeight * AppConfig.REFRESH_WAVE_ANIMATION_HEIGHT_FRACTION) *
-                                    pullRefreshState.distanceFraction
+                            translationY = resolvedTranslationY
                         },
                 )
             }
             PullToRefreshDefaults.Indicator(
                 modifier = Modifier.align(Alignment.TopCenter),
                 state = pullRefreshState,
-                isRefreshing = isRefreshing
+                isRefreshing = refreshingState == RefreshingState.Refreshing,
             )
         }
     }
@@ -393,4 +453,82 @@ private fun SearchBar(
             }
         }
     }
-} 
+}
+
+@PreviewLightDark
+@Composable
+private fun StockingsScreenSuccessPreview() {
+    AppTheme {
+        StockingsScreen(
+            uiState = HomeUiState.Success(
+                stockings = listOf(
+                    StockingInfo(
+                        id = 1L,
+                        date = LocalDate.of(2024, 11, 20),
+                        county = "County",
+                        waterbody = "Lake",
+                        category = "A",
+                        species = listOf(),
+                        isNationalForest = false,
+                        isNsf = false,
+                        isHeritageDayWater = false,
+                        isDelayedHarvest = false,
+                    ),
+                    StockingInfo(
+                        id = 2L,
+                        date = LocalDate.of(2024, 11, 20),
+                        county = "County2",
+                        waterbody = "Lake2",
+                        category = "B",
+                        species = listOf("Brook Trout"),
+                        isNationalForest = false,
+                        isNsf = false,
+                        isHeritageDayWater = false,
+                        isDelayedHarvest = false,
+                    ),
+                    StockingInfo(
+                        id = 3L,
+                        date = LocalDate.of(2024, 11, 21),
+                        county = "County2",
+                        waterbody = "Lake",
+                        category = "A",
+                        species = listOf("Rainbow Trout"),
+                        isNationalForest = false,
+                        isNsf = false,
+                        isHeritageDayWater = false,
+                        isDelayedHarvest = false,
+                    )
+                )
+            ),
+            refreshingState = RefreshingState.Idle,
+            pagingState = PagingState.Idle,
+            filters = StockingFilters(),
+            refreshStockings = {},
+            updateFilters = { _ -> },
+            updateSearchTerm = { _ -> },
+            onStockingClick = {},
+            onLoadNextPage = {},
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun StockingsScreenErrorPreview() {
+    AppTheme {
+        StockingsScreen(
+            uiState = HomeUiState.Error(
+                R.string.generic_error_message,
+                R.string.generic_error_body
+            ),
+            refreshingState = RefreshingState.Idle,
+            pagingState = PagingState.Idle,
+            filters = StockingFilters(),
+            refreshStockings = {},
+            updateFilters = { _ -> },
+            updateSearchTerm = { _ -> },
+            onStockingClick = {},
+            onLoadNextPage = {},
+        )
+    }
+}

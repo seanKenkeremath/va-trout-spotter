@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import androidx.core.app.NotificationCompat
 import com.kenkeremath.vatroutspotter.R
+import com.kenkeremath.vatroutspotter.domain.error.toDomainException
 
 class FetchAndNotifyStockingsUseCase @Inject constructor(
     private val stockingRepository: StockingRepository,
@@ -41,7 +42,7 @@ class FetchAndNotifyStockingsUseCase @Inject constructor(
                     onFailure = { Result.failure(it) }
                 )
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(e.toDomainException())
         }
     }
 

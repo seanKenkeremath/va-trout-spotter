@@ -5,11 +5,18 @@
     <string name="title_notifications">Stocking notifications</string>
     <string name="title_notifications_short">Notifications</string>
 
+    <!-- Errors -->
+    <string name="network_error_message">A network error has occurred.</string>
+    <string name="network_error_body">Check your connection and try again.</string>
+    <string name="generic_error_message">Something went wrong.</string>
+    <string name="generic_error_body">Please try again in a few minutes.</string>
+
     <!-- Stockings Screen -->
     <string name="stockings_initial_load_message">Loading recent stocking records…</string>
     <string name="stockings_empty_message">No matching records</string>
     <string name="stockings_empty_body">Try modifying or clearing your filters</string>
     <string name="stockings_species_format">Species: %s</string>
+    <string name="retry">Retry</string>
 
     <!-- Waterbody detail -->
     <string name="waterbody_county_label">County</string>

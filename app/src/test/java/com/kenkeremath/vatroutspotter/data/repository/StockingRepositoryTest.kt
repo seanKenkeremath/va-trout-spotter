@@ -15,6 +15,7 @@ import com.kenkeremath.vatroutspotter.data.db.StockingDao
 import com.kenkeremath.vatroutspotter.data.db.StockingEntity
 import com.kenkeremath.vatroutspotter.data.network.StockingNetworkDataSource
 import com.kenkeremath.vatroutspotter.data.preferences.AppPreferences
+import com.kenkeremath.vatroutspotter.domain.error.TroutSpotterException
 import com.kenkeremath.vatroutspotter.util.TestFactory
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -125,16 +126,15 @@ class StockingRepositoryTest {
     @Test
     fun `refreshSinceLastStocking returns failure when network call fails`() = runTest {
         val expectedStartDate = LocalDate.now().minusMonths(AppConfig.DEFAULT_MONTHS_PAST)
-        val expectedException = Exception("Network error")
 
         coEvery { networkDataSource.fetchStockings(expectedStartDate) } returns Result.failure(
-            expectedException
+            Exception()
         )
 
         val result = repository.fetchLatestStockings()
 
         assert(result.isFailure)
-        assertEquals(expectedException, result.exceptionOrNull())
+        assertEquals(TroutSpotterException.GenericException, result.exceptionOrNull())
     }
 
     @Test
